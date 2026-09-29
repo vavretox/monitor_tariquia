@@ -1,0 +1,13 @@
+<?php
+use Illuminate\Database\Migrations\Migration;use Illuminate\Database\Schema\Blueprint;use Illuminate\Support\Facades\DB;use Illuminate\Support\Facades\Schema;use Illuminate\Support\Str;
+return new class extends Migration{
+ public function up():void{
+  Schema::create('necesidades',function(Blueprint $t){$t->id();$t->foreignId('comunidad_id')->constrained('comunidades')->cascadeOnDelete();$t->string('titulo');$t->text('descripcion')->nullable();$t->string('categoria')->nullable();$t->string('prioridad')->default('media');$t->string('estado')->default('identificada');$t->timestamps();});
+  Schema::table('acciones_compromisos',function(Blueprint $t){$t->foreignId('necesidad_id')->nullable()->after('comunidad_id')->constrained('necesidades')->nullOnDelete();});
+  Schema::create('acciones_ejecucion',function(Blueprint $t){$t->id();$t->foreignId('accion_compromiso_id')->constrained('acciones_compromisos')->cascadeOnDelete();$t->foreignId('responsable_id')->nullable()->constrained('responsables')->nullOnDelete();$t->string('titulo');$t->text('descripcion')->nullable();$t->string('estado')->default('pendiente');$t->unsignedTinyInteger('avance')->default(0);$t->date('fecha_inicio')->nullable();$t->date('fecha_limite')->nullable();$t->text('proximo_paso')->nullable();$t->text('resultado')->nullable();$t->text('evidencias')->nullable();$t->timestamps();});
+  $comunidades=DB::table('comunidades')->get();
+  foreach($comunidades as $c){if(!$c->necesidades)continue;$id=DB::table('necesidades')->insertGetId(['comunidad_id'=>$c->id,'titulo'=>'Necesidades prioritarias de '.$c->nombre,'descripcion'=>$c->necesidades,'categoria'=>'Necesidades comunitarias','prioridad'=>'alta','estado'=>'identificada','created_at'=>now(),'updated_at'=>now()]);DB::table('acciones_compromisos')->where('comunidad_id',$c->id)->whereNull('necesidad_id')->update(['necesidad_id'=>$id]);}
+  foreach(DB::table('acciones_compromisos')->orderBy('id')->get() as $c){DB::table('acciones_ejecucion')->insert(['accion_compromiso_id'=>$c->id,'responsable_id'=>$c->responsable_id,'titulo'=>'Ejecutar: '.$c->titulo,'descripcion'=>$c->proximo_paso?:$c->descripcion,'estado'=>match($c->estado){'cumplido'=>'completada','en_ejecucion'=>'en_ejecucion','suspendido'=>'bloqueada',default=>'pendiente'},'avance'=>$c->porcentaje??0,'fecha_inicio'=>$c->fecha_compromiso,'fecha_limite'=>$c->fecha_limite,'proximo_paso'=>$c->proximo_paso,'resultado'=>$c->resultado_esperado,'evidencias'=>$c->evidencias,'created_at'=>now(),'updated_at'=>now()]);}
+ }
+ public function down():void{Schema::dropIfExists('acciones_ejecucion');Schema::table('acciones_compromisos',fn(Blueprint $t)=>$t->dropConstrainedForeignId('necesidad_id'));Schema::dropIfExists('necesidades');}
+};

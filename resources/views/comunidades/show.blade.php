@@ -1,0 +1,6 @@
+<x-app-layout>
+ <x-slot name="header"><div class="flex flex-wrap justify-between gap-3"><div><p class="text-sm font-semibold text-emerald-700">Comunidad</p><h2 class="text-xl font-bold">{{ $comunidad->nombre }}</h2><p class="text-sm text-slate-500">{{ $comunidad->territorio?:'Territorio sin definir' }}</p></div>@can('comunidades.edit')<a href="{{ route('comunidades.edit',$comunidad) }}" class="ui-btn-secondary self-start">Editar comunidad</a>@endcan</div></x-slot>
+ <div class="py-6"><div class="mx-auto max-w-5xl px-4">@if(session('success'))<div class="mb-5 rounded-xl bg-emerald-100 p-4 text-emerald-800">{{ session('success') }}</div>@endif
+  <div class="ui-form-card"><h3 class="border-b pb-3 text-lg font-bold">Información territorial</h3><div class="mt-5 grid gap-5 md:grid-cols-3"><div><p class="text-xs font-bold uppercase text-slate-500">Territorio</p><p class="mt-1">{{ $comunidad->territorio?:'Sin definir' }}</p></div><div><p class="text-xs font-bold uppercase text-slate-500">Latitud</p><p class="mt-1 font-mono">{{ $comunidad->latitud }}</p></div><div><p class="text-xs font-bold uppercase text-slate-500">Longitud</p><p class="mt-1 font-mono">{{ $comunidad->longitud }}</p></div></div></div>
+ </div></div>
+</x-app-layout>

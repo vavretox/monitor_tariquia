@@ -1,0 +1,1 @@
+<x-app-layout><x-slot name="header"><h2 class="font-bold text-xl">Editar acción</h2></x-slot><div class="py-6"><div class="max-w-4xl mx-auto px-4"><form method="POST" action="{{ route('acciones.update',$accionEjecucion) }}" class="ui-form-card" enctype="multipart/form-data">@method('PUT') @include('acciones_ejecucion._form')</form></div></div></x-app-layout>

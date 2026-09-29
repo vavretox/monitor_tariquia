@@ -1,0 +1,1 @@
+<x-app-layout><x-slot name="header"><h2 class="font-semibold text-xl">Editar responsable</h2></x-slot><div class="py-6"><div class="max-w-5xl mx-auto px-4"><form method="POST" action="{{ route('responsables.update',$responsable) }}" class="ui-form-card">@method('PUT') @include('responsables._form')</form></div></div></x-app-layout>

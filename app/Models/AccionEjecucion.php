@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+
+class AccionEjecucion extends Model
+{
+    use LogsActivity;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('responsable', function ($query) {
+            $user = auth()->user();
+            $id = $user?->hasRole('responsable') ? $user->responsable?->id : null;
+            if ($id) $query->whereHas('responsables', fn ($responsables) => $responsables->where('responsables.id', $id));
+        });
+        static::created(function ($model) {
+            $user = auth()->user();
+            $id = $user?->hasRole('responsable') ? $user->responsable?->id : null;
+            if ($id) {
+                $model->responsables()->syncWithoutDetaching([$id]);
+                $model->forceFill(['responsable_id' => $id])->saveQuietly();
+            }
+        });
+    }
+    protected $table = 'acciones_ejecucion';
+
+    protected $fillable = [
+        'accion_compromiso_id', 'responsable_id', 'titulo', 'descripcion', 'estado',
+        'avance', 'ultima_actualizacion_avance', 'fecha_inicio', 'fecha_limite', 'resultado_esperado', 'proximo_paso', 'resultado', 'evidencias',
+    ];
+
+    protected $casts = [
+        'fecha_inicio' => 'date',
+        'fecha_limite' => 'date',
+        'avance' => 'integer',
+        'ultima_actualizacion_avance' => 'datetime',
+    ];
+
+    public function compromiso(): BelongsTo
+    {
+        return $this->belongsTo(AccionCompromiso::class, 'accion_compromiso_id');
+    }
+
+    public function responsable(): BelongsTo
+    {
+        return $this->belongsTo(Responsable::class);
+    }
+
+    public function responsables(): BelongsToMany
+    {
+        return $this->belongsToMany(Responsable::class, 'accion_ejecucion_responsable')->withTimestamps();
+    }
+
+    public function archivos(): HasMany
+    {
+        return $this->hasMany(AccionEjecucionArchivo::class, 'accion_ejecucion_id');
+    }
+
+    public function getDiasRetrasoAttribute(): int
+    {
+        return $this->fecha_limite && $this->estado !== 'completada' && $this->fecha_limite->isBefore(today())
+            ? $this->fecha_limite->diffInDays(today()) : 0;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logAll()->logOnlyDirty();
+    }
+
+    public function historialAvances(): HasMany
+    {
+        return $this->hasMany(HistorialAvance::class, 'accion_ejecucion_id')->latest();
+    }
+}

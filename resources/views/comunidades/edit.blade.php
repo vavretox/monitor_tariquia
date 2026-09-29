@@ -1,0 +1,1 @@
+<x-app-layout><x-slot name="header"><h2 class="font-semibold text-xl">Editar comunidad: {{ $comunidad->nombre }}</h2></x-slot><div class="py-6"><div class="max-w-4xl mx-auto px-4"><form method="POST" action="{{ route('comunidades.update',$comunidad) }}" class="ui-form-card">@method('PUT') @include('comunidades._form')</form></div></div></x-app-layout>

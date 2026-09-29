@@ -1,0 +1,1 @@
+<x-app-layout><x-slot name="header"><h2 class="font-semibold text-xl">Crear usuario</h2></x-slot><div class="py-6"><div class="max-w-4xl mx-auto px-4"><form method="POST" action="{{ route('admin.users.store') }}" class="ui-form-card">@include('admin.users._form',['user'=>new \App\Models\User()])</form></div></div></x-app-layout>

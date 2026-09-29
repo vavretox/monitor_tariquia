@@ -1,0 +1,1 @@
+<button {{ $attributes->merge(['type'=>'button','class'=>'ui-btn-secondary focus:outline-none focus:ring-4 focus:ring-slate-200']) }}>{{ $slot }}</button>

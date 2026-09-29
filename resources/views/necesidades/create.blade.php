@@ -1,0 +1,1 @@
+<x-app-layout><x-slot name="header"><h2 class="font-bold text-xl">Nueva necesidad</h2></x-slot><div class="py-6"><div class="max-w-4xl mx-auto px-4"><form method="POST" action="{{ route('necesidades.store') }}" class="ui-form-card">@include('necesidades._form')</form></div></div></x-app-layout>

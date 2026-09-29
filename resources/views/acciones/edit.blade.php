@@ -1,0 +1,1 @@
+<x-app-layout><x-slot name="header"><h2 class="font-semibold text-xl">Editar compromiso</h2></x-slot><div class="py-6"><div class="max-w-5xl mx-auto px-4"><form method="POST" action="{{ route('compromisos.update',$accion) }}" class="ui-form-card">@method('PUT') @include('acciones._form')</form></div></div></x-app-layout>
