@@ -21,10 +21,10 @@ class RolesAndUsersSeeder extends Seeder {
         Role::findByName('admin')->syncPermissions($permissions);
         Role::findByName('tecnico')->syncPermissions($permissions->reject(fn ($permission) => str_starts_with($permission, 'users.') || str_starts_with($permission, 'roles.')));
         Role::findByName('observador')->syncPermissions([
-            'dashboard.view', 'proyectos.view', 'comunidades.view', 'compromisos.view', 'acciones.view',
+            'dashboard.view', 'proyectos.view', 'comunidades.view', 'demandas.view', 'acciones.view',
             'responsables.view',
         ]);
-        Role::findByName('responsable')->syncPermissions(['dashboard.view', 'compromisos.view', 'compromisos.create', 'compromisos.edit', 'acciones.view', 'acciones.create', 'acciones.edit']);
+        Role::findByName('responsable')->syncPermissions(['dashboard.view', 'demandas.view', 'demandas.create', 'demandas.edit', 'acciones.view', 'acciones.create', 'acciones.edit']);
         $admin = User::firstOrCreate(['email'=>'admin@tariquia.test'], ['name'=>'Administrador','password'=>Hash::make('password'),'email_verified_at'=>now()]);
         $admin->assignRole('admin');
         $tec = User::firstOrCreate(['email'=>'tecnico@tariquia.test'], ['name'=>'Técnico','password'=>Hash::make('password'),'email_verified_at'=>now()]);
@@ -34,3 +34,4 @@ class RolesAndUsersSeeder extends Seeder {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }
+

@@ -1,6 +1,6 @@
 <?php
 namespace Database\Seeders;
-use App\Models\Responsable;use App\Models\AccionCompromiso;use Illuminate\Database\Seeder;
+use App\Models\Responsable;use Illuminate\Database\Seeder;
 class ResponsableSeeder extends Seeder{public function run():void{$rows=[
 ['Juan Pablo Pérez Mendoza','Coordinador Regional de Salud','Salud','+591 71234567','jp.perez@ministerio-salud.gob.bo','Encargado de la supervisión de centros de salud.','ACT-13','Subgobernación',1],
 ['María Elena García Choque','Directora Distrital de Educación','Educación','+591 72345678','mgarcia@educacion.gob.bo','Responsable de la implementación del nuevo currículo.','ACT-14','Subgobernación',2],
@@ -19,4 +19,4 @@ class ResponsableSeeder extends Seeder{public function run():void{$rows=[
 ['Asamblea Legislativa Departamental',null,'Gestión Institucional',null,null,null,null,null,15],
 ['Rodrigo Ríos Calabi',null,null,null,null,null,null,null,null],
 ['Fernando Martínez Arnold','Director de Promoción Turística','Turismo',null,null,null,null,null,null]];
-foreach($rows as [$nombre_completo,$cargo_rol,$area,$telefono,$email,$notas,$actualizaciones_registradas,$institucion,$accionOrden]){$r=Responsable::updateOrCreate(['nombre_completo'=>$nombre_completo],compact('cargo_rol','area','telefono','email','notas','actualizaciones_registradas','institucion'));if($accionOrden&&($a=AccionCompromiso::orderBy('id')->skip($accionOrden-1)->first()))$r->acciones()->syncWithoutDetaching([$a->id]);}}}
+foreach($rows as [$nombre_completo,$cargo_rol,$area,$telefono,$email,$notas,$actualizaciones_registradas,$institucion,$accionOrden]){$r=Responsable::updateOrCreate(['nombre_completo'=>$nombre_completo],compact('cargo_rol','area','telefono','email','notas','actualizaciones_registradas','institucion'));}}}

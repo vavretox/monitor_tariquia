@@ -27,12 +27,12 @@ class OverdueActionNotification extends Notification
             ->greeting("Hola, {$notifiable->name}")
             ->line('La siguiente acción continúa sin estado Completada después de su fecha límite.')
             ->line("Acción: {$this->accion->titulo}")
-            ->line('Compromiso: '.($this->accion->compromiso?->titulo ?: 'Sin compromiso'))
+            ->line('Demanda: '.($this->accion->demanda?->titulo ?: 'Sin demanda'))
             ->line('Fecha límite: '.$this->accion->fecha_limite->format('d/m/Y'))
             ->line("Días de retraso: {$this->daysOverdue}")
             ->line('Estado actual: '.ucfirst(str_replace('_', ' ', $this->accion->estado)))
             ->line('Responsables: '.($responsables ?: 'Sin responsables registrados'))
             ->action('Actualizar acción', route('acciones.edit', $this->accion))
-            ->line('Actualiza el estado y registra el avance correspondiente.');
+            ->line('Actualiza el estado y registra el seguimiento correspondiente.');
     }
 }

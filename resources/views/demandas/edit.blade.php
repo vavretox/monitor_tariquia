@@ -1,0 +1,1 @@
+<x-app-layout><x-slot name="header"><h2 class="text-xl font-bold">Editar demanda</h2></x-slot><div class="py-6"><div class="mx-auto max-w-5xl px-4"><div class="ui-form-card"><form method="POST" action="{{ route('demandas.update',$demanda) }}">@method('PUT') @include('demandas._form')</form></div></div></div></x-app-layout>

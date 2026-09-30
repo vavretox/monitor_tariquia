@@ -1,10 +1,51 @@
 <x-app-layout>
-<x-slot name="header"><div class="flex flex-wrap items-center justify-between gap-3"><div><p class="text-sm font-semibold text-emerald-700">Monitoreo integral</p><h2 class="text-2xl font-extrabold">Matriz general de seguimiento</h2><p class="text-sm text-slate-500">Necesidad → compromiso → acción → evidencia</p></div><div class="flex gap-2"><a href="{{ route('reportes.alertas') }}" class="ui-btn-secondary">Alertas</a><a href="{{ route('reportes.seguimiento.csv') }}" class="ui-btn-primary">Exportar CSV</a><button onclick="window.print()" class="ui-btn-secondary">Imprimir / PDF</button></div></div></x-slot>
-<div class="py-6"><div class="mx-auto max-w-[1700px] px-4"><div class="ui-card overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-slate-100 text-left text-xs uppercase text-slate-600"><tr><th class="p-3">Comunidad</th><th class="p-3">Necesidad</th><th class="p-3">Compromiso</th><th class="p-3">Acción</th><th class="p-3">Responsables</th><th class="p-3">Estado</th><th class="p-3">Avance</th><th class="p-3">Fecha límite</th><th class="p-3">Próximo paso</th><th class="p-3">Evidencias</th></tr></thead><tbody class="divide-y divide-slate-100">
-@forelse($necesidades as $necesidad) @foreach($necesidad->compromisos as $compromiso)
- @forelse($compromiso->accionesEjecucion as $accion)<tr class="hover:bg-emerald-50/40"><td class="p-3 font-semibold">{{ $necesidad->comunidades->pluck('nombre')->join(', ') ?: 'Sin comunidades' }}</td><td class="p-3"><a class="text-amber-800 hover:underline" href="{{ route('necesidades.show',$necesidad) }}">{{ $necesidad->titulo }}</a></td><td class="p-3"><a class="text-indigo-700 hover:underline" href="{{ route('compromisos.show',$compromiso) }}">{{ $compromiso->titulo }}</a></td><td class="p-3">{{ $accion->titulo }}</td><td class="p-3">{{ $accion->responsables->pluck('nombre_completo')->join(', ') ?: 'Sin responsable' }}</td><td class="p-3"><span class="ui-badge bg-slate-100 text-slate-700">{{ ucfirst(str_replace('_',' ',$accion->estado)) }}</span></td><td class="p-3"><div class="h-2 w-24 overflow-hidden rounded bg-slate-200"><div class="h-full bg-emerald-500" style="width:{{ $accion->avance }}%"></div></div><small>{{ $accion->avance }}%</small></td><td class="p-3 whitespace-nowrap">{{ $accion->fecha_limite?->format('d/m/Y') ?: 'Sin fecha' }} @if($accion->dias_retraso)<strong class="block text-red-700">{{ $accion->dias_retraso }} d&iacute;a(s) tarde</strong>@endif</td><td class="p-3">{{ $accion->proximo_paso ?: 'Sin definir' }}</td><td class="p-3 text-center">{{ $accion->archivos->count() }}</td></tr>
- @empty<tr><td class="p-3 font-semibold">{{ $necesidad->comunidades->pluck('nombre')->join(', ') ?: 'Sin comunidades' }}</td><td class="p-3">{{ $necesidad->titulo }}</td><td class="p-3">{{ $compromiso->titulo }}</td><td colspan="7" class="p-3 text-slate-500">Compromiso sin acciones registradas.</td></tr>@endforelse
-@endforeach @empty<tr><td colspan="10" class="p-8 text-center text-slate-500">No existen datos de seguimiento.</td></tr>@endforelse
-</tbody></table></div></div></div>
-@push('styles')<style>@media print{nav,header button,header a{display:none!important}body{background:#fff}.ui-card{box-shadow:none!important}table{font-size:9px}}</style>@endpush
+    <x-slot name="header">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <p class="text-sm font-semibold text-emerald-700">Monitoreo integral</p>
+                <h2 class="text-2xl font-extrabold">Matriz general de seguimiento</h2>
+                <p class="text-sm text-slate-500">Necesidad → compromiso → acción → evidencia</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="{{ route('reportes.alertas') }}" class="ui-btn-secondary">Alertas</a>
+                <a href="{{ route('reportes.seguimiento.csv') }}" class="ui-btn-primary">Exportar CSV</a>
+                <button onclick="window.print()" class="ui-btn-secondary">Imprimir / PDF</button>
+            </div>
+        </div>
+    </x-slot>
+    <div class="py-6">
+        <div class="mx-auto max-w-[1700px] px-4">
+            <div class="ui-card overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                        <tr><th class="p-3">Comunidad</th><th class="p-3">Necesidad</th><th class="p-3">Compromiso</th><th class="p-3">Acción</th><th class="p-3">Responsables</th><th class="p-3">Estado</th><th class="p-3">Fecha límite</th><th class="p-3">Próximo paso</th><th class="p-3">Evidencias</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse($necesidades as $necesidad)
+                            @foreach($necesidad->compromisos as $compromiso)
+                                @forelse($compromiso->accionesEjecucion as $accion)
+                                    <tr class="hover:bg-emerald-50/40">
+                                        <td class="p-3 font-semibold">{{ $necesidad->comunidades->pluck('nombre')->join(', ') ?: 'Sin comunidades' }}</td>
+                                        <td class="p-3"><a class="text-amber-800 hover:underline" href="{{ route('necesidades.show', $necesidad) }}">{{ $necesidad->titulo }}</a></td>
+                                        <td class="p-3"><a class="text-indigo-700 hover:underline" href="{{ route('compromisos.show', $compromiso) }}">{{ $compromiso->titulo }}</a></td>
+                                        <td class="p-3">{{ $accion->titulo }}</td>
+                                        <td class="p-3">{{ $accion->responsables->pluck('nombre_completo')->join(', ') ?: 'Sin responsable' }}</td>
+                                        <td class="p-3"><span class="ui-badge bg-slate-100 text-slate-700">{{ ucfirst(str_replace('_', ' ', $accion->estado)) }}</span></td>
+                                        <td class="p-3 whitespace-nowrap">{{ $accion->fecha_limite?->format('d/m/Y') ?: 'Sin fecha' }} @if($accion->dias_retraso)<strong class="block text-red-700">{{ $accion->dias_retraso }} día(s) tarde</strong>@endif</td>
+                                        <td class="p-3">{{ $accion->proximo_paso ?: 'Sin definir' }}</td>
+                                        <td class="p-3 text-center">{{ $accion->archivos->count() }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td class="p-3 font-semibold">{{ $necesidad->comunidades->pluck('nombre')->join(', ') ?: 'Sin comunidades' }}</td><td class="p-3">{{ $necesidad->titulo }}</td><td class="p-3">{{ $compromiso->titulo }}</td><td colspan="6" class="p-3 text-slate-500">Compromiso sin acciones registradas.</td></tr>
+                                @endforelse
+                            @endforeach
+                        @empty
+                            <tr><td colspan="9" class="p-8 text-center text-slate-500">No existen datos de seguimiento.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @push('styles')<style>@media print{nav,header button,header a{display:none!important}body{background:#fff}.ui-card{box-shadow:none!important}table{font-size:9px}}</style>@endpush
 </x-app-layout>

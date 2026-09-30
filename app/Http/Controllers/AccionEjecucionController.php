@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AccionCompromiso;
+use App\Models\Demanda;
 use App\Models\AccionEjecucion;
 use App\Models\Responsable;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +15,7 @@ class AccionEjecucionController extends Controller
 {
     public function index(Request $request): View
     {
-        $acciones = AccionEjecucion::with(['compromiso.necesidad.comunidad', 'responsables'])
+        $acciones = AccionEjecucion::with(['demanda.comunidades', 'responsables'])
             ->withCount('archivos')
             ->when($request->filled('buscar'), fn ($query) => $query->where('titulo', 'like', '%'.$request->buscar.'%'))
             ->when($request->filled('estado'), fn ($query) => $query->where('estado', $request->estado))
@@ -28,7 +28,7 @@ class AccionEjecucionController extends Controller
 
     public function create(Request $request): View
     {
-        return view('acciones_ejecucion.create', $this->catalogos($request->integer('compromiso_id') ?: null));
+        return view('acciones_ejecucion.create', $this->catalogos($request->integer('demanda_id') ?: null));
     }
 
     public function store(Request $request): RedirectResponse
@@ -51,7 +51,7 @@ class AccionEjecucionController extends Controller
 
         $this->guardarDocumentos($accion, $documentos);
 
-        return redirect()->route('compromisos.show', $accion->accion_compromiso_id)
+        return redirect()->route('demandas.show', $accion->demanda_id)
             ->with('success', 'Acción registrada correctamente.');
     }
 
@@ -73,7 +73,8 @@ class AccionEjecucionController extends Controller
         $data['responsable_id'] = $responsables[0] ?? null;
 
         DB::transaction(function () use ($accione, $data, $responsables, $comentarioAvance) {
-            $cambioSeguimiento = (int) $accione->avance !== (int) $data['avance'] || $accione->estado !== $data['estado'];
+            $cambioSeguimiento = $accione->estado !== $data['estado']
+                || (array_key_exists('avance', $data) && (int) $accione->avance !== (int) $data['avance']);
             if ($cambioSeguimiento) $data['ultima_actualizacion_avance'] = now();
             $accione->update($data);
             $accione->responsables()->sync($responsables);
@@ -92,7 +93,7 @@ class AccionEjecucionController extends Controller
 
         $this->guardarDocumentos($accione, $documentos);
 
-        return redirect()->route('compromisos.show', $accione->accion_compromiso_id)
+        return redirect()->route('demandas.show', $accione->demanda_id)
             ->with('success', 'Acción actualizada correctamente.');
     }
 
@@ -107,26 +108,26 @@ class AccionEjecucionController extends Controller
         return back()->with('success', 'Acción eliminada.');
     }
 
-    private function catalogos(?int $compromisoId = null): array
+    private function catalogos(?int $demandaId = null): array
     {
         return [
-            'compromisos' => AccionCompromiso::with(['necesidad.comunidad', 'comunidad'])->orderBy('titulo')->get(),
+            'demandas' => Demanda::with('comunidades')->orderBy('titulo')->get(),
             'responsables' => Responsable::orderBy('nombre_completo')->get(),
-            'compromisoId' => $compromisoId,
+            'demandaId' => $demandaId,
         ];
     }
 
     private function validar(Request $request): array
     {
         return $request->validate([
-            'accion_compromiso_id' => ['required', 'exists:acciones_compromisos,id'],
+            'demanda_id' => ['required', 'exists:demandas,id'],
             'responsable_ids' => ['nullable', 'array'],
             'responsable_ids.*' => ['integer', 'distinct', 'exists:responsables,id'],
             'titulo' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string'],
             'resultado_esperado' => ['nullable', 'string'],
             'estado' => ['required', 'in:pendiente,en_ejecucion,completada,bloqueada'],
-            'avance' => ['required', 'integer', 'between:0,100'],
+            'avance' => ['sometimes', 'integer', 'between:0,100'],
             'comentario_avance' => ['nullable', 'string', 'max:2000'],
             'fecha_inicio' => ['nullable', 'date'],
             'fecha_limite' => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
@@ -157,3 +158,4 @@ class AccionEjecucionController extends Controller
         }
     }
 }
+

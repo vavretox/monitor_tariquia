@@ -1,6 +1,6 @@
-@csrf @php($x=$accionEjecucion??null)
+﻿@csrf @php($x=$accionEjecucion??null)
 <div class="grid md:grid-cols-2 gap-5">
-<div class="md:col-span-2"><x-input-label value="Compromiso"/><select name="accion_compromiso_id" class="w-full" required>@foreach($compromisos as $c)<option value="{{ $c->id }}" @selected(old('accion_compromiso_id',$x?->accion_compromiso_id??$compromisoId??null)==$c->id)>{{ $c->titulo }} — {{ $c->comunidad?->nombre??'Sin comunidad' }}</option>@endforeach</select></div>
+<div class="md:col-span-2"><x-input-label value="Demanda"/><select name="demanda_id" class="w-full" required>@foreach($demandas as $c)<option value="{{ $c->id }}" @selected(old('demanda_id',$x?->demanda_id??$demandaId??null)==$c->id)>{{ $c->titulo }} — {{ $c->comunidades->pluck('nombre')->join(', ') }}</option>@endforeach</select></div>
 <div><x-input-label value="Acción a ejecutar"/><x-text-input name="titulo" class="w-full" :value="old('titulo',$x?->titulo)" required/></div>
 <div class="md:col-span-2">
  <x-input-label value="Responsables de la acción"/><p class="mb-2 text-xs text-slate-500">Selecciona uno o varios responsables.</p>
@@ -26,7 +26,6 @@
  </details>
  <x-input-error :messages="$errors->get('responsable_ids')" class="mt-2"/>
 </div>
-<div><x-input-label value="Porcentaje de avance"/><div class="flex items-center gap-3"><input id="avance" type="range" name="avance" min="0" max="100" step="5" value="{{ old('avance',$x?->avance??0) }}" class="w-full accent-emerald-600" oninput="document.getElementById('avance-valor').textContent=this.value+'%'"><b id="avance-valor" class="w-14 text-right text-emerald-700">{{ old('avance',$x?->avance??0) }}%</b></div><x-input-error :messages="$errors->get('avance')" class="mt-2"/></div>
 <div><x-input-label value="Estado"/><select name="estado" class="w-full">@foreach(['pendiente'=>'Pendiente','en_ejecucion'=>'En ejecución','completada'=>'Completada','bloqueada'=>'Bloqueada'] as $v=>$l)<option value="{{ $v }}" @selected(old('estado',$x?->estado??'pendiente')===$v)>{{ $l }}</option>@endforeach</select></div>
 <div><x-input-label value="Fecha de inicio"/><x-text-input type="date" name="fecha_inicio" class="w-full" :value="old('fecha_inicio',$x?->fecha_inicio?->format('Y-m-d'))"/></div>
 <div><x-input-label value="Fecha límite"/><x-text-input type="date" name="fecha_limite" class="w-full" :value="old('fecha_limite',$x?->fecha_limite?->format('Y-m-d'))"/></div>
@@ -42,7 +41,7 @@
  <textarea name="evidencias" rows="3" class="w-full" placeholder="Describe aquí las evidencias o agrega observaciones relevantes.">{{ old('evidencias',$x?->evidencias) }}</textarea>
  <x-input-error :messages="$errors->get('evidencias')" class="mt-2"/>
 </div>
-<div class="md:col-span-2"><x-input-label value="Comentario de esta actualización"/><textarea name="comentario_avance" rows="2" class="w-full" placeholder="Explique brevemente qué cambió en el avance o estado.">{{ old('comentario_avance') }}</textarea><p class="mt-1 text-xs text-slate-500">Al cambiar el porcentaje o estado, esta actualización quedará guardada en el historial.</p></div>
+<div class="md:col-span-2"><x-input-label value="Comentario de esta actualización"/><textarea name="comentario_avance" rows="2" class="w-full" placeholder="Explique brevemente qué cambió en el estado o seguimiento.">{{ old('comentario_avance') }}</textarea><p class="mt-1 text-xs text-slate-500">Al cambiar el estado, esta actualización quedará guardada en el historial.</p></div>
 <div class="md:col-span-2 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/50 p-4">
  <x-input-label value="Documentos de respaldo"/>
  <p class="mb-3 text-xs text-slate-600">Puedes seleccionar hasta 10 archivos JPG, JPEG, PNG, PDF, DOC o DOCX. Máximo 10 MB por archivo.</p>
@@ -71,7 +70,7 @@
   </div>
  @endif
 </div>
-</div><div class="mt-6 flex gap-3"><x-primary-button>Guardar acción</x-primary-button><a href="{{ $x ? route('compromisos.show',$x->accion_compromiso_id) : route('acciones.index') }}" class="ui-btn-secondary">Cancelar</a></div>
+</div><div class="mt-6 flex gap-3"><x-primary-button>Guardar acción</x-primary-button><a href="{{ $x ? route('demandas.show',$x->demanda_id) : route('acciones.index') }}" class="ui-btn-secondary">Cancelar</a></div>
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
  const search=document.getElementById('buscar-responsable'),options=[...document.querySelectorAll('.responsable-opcion')],checks=[...document.querySelectorAll('.responsable-check')],count=document.getElementById('responsables-contador'),summary=document.getElementById('responsables-resumen'),names=document.getElementById('responsables-nombres'),results=document.getElementById('responsables-resultados'),empty=document.getElementById('responsables-sin-resultados');
@@ -81,3 +80,4 @@ document.addEventListener('DOMContentLoaded',()=>{
  search?.addEventListener('input',filter);checks.forEach(item=>item.addEventListener('change',update));document.getElementById('limpiar-responsables')?.addEventListener('click',()=>{checks.forEach(item=>item.checked=false);update()});update();filter();
 });
 </script>
+

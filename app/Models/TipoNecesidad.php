@@ -11,8 +11,8 @@ class TipoNecesidad extends Model
 
     protected $fillable = ['nombre'];
 
-    public function necesidades(): HasMany
+    public function demandas(): HasMany
     {
-        return $this->hasMany(Necesidad::class, 'tipo_necesidad_id');
+        return $this->hasMany(Demanda::class, 'tipo_necesidad_id');
     }
 }

@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="app-navigation bg-white border-b border-gray-100">
+﻿<nav x-data="{ open: false }" class="app-navigation bg-white border-b border-gray-100">
  <div class="mx-auto w-full max-w-[1700px] px-4 sm:px-6 lg:px-8">
   <div class="flex justify-between h-16">
    <div class="flex min-w-0 flex-1">
@@ -7,8 +7,7 @@
     <div class="hidden min-w-0 flex-1 items-stretch justify-evenly gap-3 sm:-my-px sm:ms-8 sm:flex">
      @can('dashboard.view')<x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Mapa</x-nav-link>@endcan
      @can('comunidades.view')<x-nav-link :href="route('comunidades.index')" :active="request()->routeIs('comunidades.*')">Comunidades</x-nav-link>@endcan
-     @can('necesidades.view')<x-nav-link :href="route('necesidades.index')" :active="request()->routeIs('necesidades.*')">Necesidades</x-nav-link>@endcan
-     @can('compromisos.view')<x-nav-link :href="route('compromisos.index')" :active="request()->routeIs('compromisos.*')">Compromisos</x-nav-link>@endcan
+     @can('demandas.view')<x-nav-link :href="route('demandas.index')" :active="request()->routeIs('demandas.*')">Demandas</x-nav-link>@endcan
      @can('acciones.view')<x-nav-link :href="route('acciones.index')" :active="request()->routeIs('acciones.*')">Acciones</x-nav-link>@endcan
      @can('responsables.view')<x-nav-link :href="route('responsables.index')" :active="request()->routeIs('responsables.*')">Responsables</x-nav-link>@endcan
 @can('dashboard.view')<x-nav-link :href="route('reportes.seguimiento')" :active="request()->routeIs('reportes.*')">Reportes</x-nav-link>@endcan
@@ -29,8 +28,7 @@
   <div class="pt-2 pb-3 space-y-1">
    @can('dashboard.view')<x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Mapa</x-responsive-nav-link>@endcan
    @can('comunidades.view')<x-responsive-nav-link :href="route('comunidades.index')" :active="request()->routeIs('comunidades.*')">Comunidades</x-responsive-nav-link>@endcan
-   @can('necesidades.view')<x-responsive-nav-link :href="route('necesidades.index')" :active="request()->routeIs('necesidades.*')">Necesidades</x-responsive-nav-link>@endcan
-   @can('compromisos.view')<x-responsive-nav-link :href="route('compromisos.index')" :active="request()->routeIs('compromisos.*')">Compromisos</x-responsive-nav-link>@endcan
+   @can('demandas.view')<x-responsive-nav-link :href="route('demandas.index')" :active="request()->routeIs('demandas.*')">Demandas</x-responsive-nav-link>@endcan
    @can('acciones.view')<x-responsive-nav-link :href="route('acciones.index')" :active="request()->routeIs('acciones.*')">Acciones</x-responsive-nav-link>@endcan
    @can('responsables.view')<x-responsive-nav-link :href="route('responsables.index')" :active="request()->routeIs('responsables.*')">Responsables</x-responsive-nav-link>@endcan
 @can('dashboard.view')<x-responsive-nav-link :href="route('reportes.seguimiento')" :active="request()->routeIs('reportes.*')">Reportes</x-responsive-nav-link>@endcan
@@ -40,3 +38,4 @@
  </div>
  @endauth
 </nav>
+

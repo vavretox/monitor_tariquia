@@ -5,9 +5,8 @@ use App\Http\Controllers\EvidenciaArchivoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ComunidadController;
-use App\Http\Controllers\AccionCompromisoController;
+use App\Http\Controllers\DemandaController;
 use App\Http\Controllers\ResponsableController;
-use App\Http\Controllers\NecesidadController;
 use App\Http\Controllers\AccionEjecucionController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\RoleManagementController;
@@ -18,7 +17,7 @@ Route::pattern('proyecto', '[0-9]+');
 Route::pattern('comunidad', '[0-9]+');
 Route::pattern('accione', '[0-9]+');
 Route::pattern('responsable', '[0-9]+');
-Route::pattern('necesidade', '[0-9]+');
+Route::pattern('demanda', '[0-9]+');
 Route::pattern('archivo', '[0-9]+');
 Route::pattern('user', '[0-9]+');
 Route::pattern('role', '[0-9]+');
@@ -41,19 +40,15 @@ Route::middleware(['auth','active','verified','password.changed'])->group(functi
     Route::resource('comunidades', ComunidadController::class)->only(['edit','update'])->parameters(['comunidades' => 'comunidad'])->middleware('permission:comunidades.edit');
     Route::resource('comunidades', ComunidadController::class)->only(['destroy'])->parameters(['comunidades' => 'comunidad'])->middleware('permission:comunidades.delete');
 
-    Route::resource('compromisos', AccionCompromisoController::class)->only(['index','show'])->parameters(['compromisos' => 'accione'])->middleware('permission:compromisos.view');
-    Route::resource('compromisos', AccionCompromisoController::class)->only(['create','store'])->parameters(['compromisos' => 'accione'])->middleware('permission:compromisos.create');
-    Route::resource('compromisos', AccionCompromisoController::class)->only(['edit','update'])->parameters(['compromisos' => 'accione'])->middleware('permission:compromisos.edit');
-    Route::resource('compromisos', AccionCompromisoController::class)->only(['destroy'])->parameters(['compromisos' => 'accione'])->middleware('permission:compromisos.delete');
+    Route::resource('demandas', DemandaController::class)->only(['index','show'])->middleware('permission:demandas.view');
+    Route::resource('demandas', DemandaController::class)->only(['create','store'])->middleware('permission:demandas.create');
+    Route::resource('demandas', DemandaController::class)->only(['edit','update'])->middleware('permission:demandas.edit');
+    Route::resource('demandas', DemandaController::class)->only(['destroy'])->middleware('permission:demandas.delete');
 
     Route::resource('responsables', ResponsableController::class)->only(['index','show'])->middleware('permission:responsables.view');
     Route::resource('responsables', ResponsableController::class)->only(['create','store'])->middleware('permission:responsables.create');
     Route::resource('responsables', ResponsableController::class)->only(['edit','update'])->middleware('permission:responsables.edit');
     Route::resource('responsables', ResponsableController::class)->only(['destroy'])->middleware('permission:responsables.delete');
-    Route::resource('necesidades', NecesidadController::class)->only(['index','show'])->middleware('permission:necesidades.view');
-    Route::resource('necesidades', NecesidadController::class)->only(['create','store'])->middleware('permission:necesidades.create');
-    Route::resource('necesidades', NecesidadController::class)->only(['edit','update'])->middleware('permission:necesidades.edit');
-    Route::resource('necesidades', NecesidadController::class)->only(['destroy'])->middleware('permission:necesidades.delete');
     Route::resource('acciones', AccionEjecucionController::class)->only(['index'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.view');
     Route::resource('acciones', AccionEjecucionController::class)->only(['create','store'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.create');
     Route::resource('acciones', AccionEjecucionController::class)->only(['edit','update'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.edit');
@@ -95,3 +90,4 @@ Route::middleware(['auth','active'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 require __DIR__.'/auth.php';
+

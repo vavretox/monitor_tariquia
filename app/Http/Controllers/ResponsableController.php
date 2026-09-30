@@ -51,7 +51,7 @@ class ResponsableController extends Controller
         }
         return redirect()->route('responsables.index')->with('success', $user ? 'Responsable y cuenta de acceso creados.' : 'Responsable registrado.');
     }
-    public function show(Responsable $responsable) { $responsable->load('accionesEjecucion.compromiso.necesidad.comunidad'); return view('responsables.show', compact('responsable')); }
+    public function show(Responsable $responsable) { $responsable->load('accionesEjecucion.demanda.comunidades'); return view('responsables.show', compact('responsable')); }
     public function edit(Responsable $responsable) { $responsable->load('areas');return view('responsables.edit', ['responsable' => $responsable, 'areas' => $this->catalogoAreas(), 'instituciones' => $this->catalogoInstituciones()]); }
     public function update(Request $request, Responsable $responsable) { $data=$this->validar($request,$responsable);DB::transaction(function()use($responsable,&$data){$areaIds=$this->resolverAreas($data);$responsable->update($data);$responsable->areas()->sync($areaIds);});return redirect()->route('responsables.index')->with('success', 'Responsable actualizado.'); }
     public function destroy(Responsable $responsable) { $responsable->delete(); return back()->with('success', 'Responsable eliminado.'); }

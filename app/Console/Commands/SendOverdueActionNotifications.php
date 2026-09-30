@@ -19,7 +19,7 @@ class SendOverdueActionNotifications extends Command
         $sent = 0;
 
         AccionEjecucion::withoutGlobalScopes()
-            ->with(['responsables.user', 'compromiso'])
+            ->with(['responsables.user', 'demanda'])
             ->whereNotNull('fecha_limite')
             ->whereDate('fecha_limite', '<', $today)
             ->where('estado', '!=', 'completada')

@@ -1,0 +1,16 @@
+@csrf
+@php($d=$demanda??null)
+@php($seleccionadas=collect(old('comunidad_ids',$d?->comunidades?->pluck('id')->all()??($comunidadId?[$comunidadId]:[])))->map(fn($id)=>(int)$id)->all())
+<div class="grid gap-5 md:grid-cols-2">
+ <div class="md:col-span-2"><x-input-label value="Comunidades involucradas"/><div class="mt-2 grid max-h-64 gap-2 overflow-y-auto rounded-xl border bg-slate-50 p-3 sm:grid-cols-2 lg:grid-cols-3">@foreach($comunidades as $comunidad)<label class="flex cursor-pointer gap-2 rounded-lg bg-white p-3 shadow-sm"><input type="checkbox" name="comunidad_ids[]" value="{{ $comunidad->id }}" class="mt-1 rounded" @checked(in_array($comunidad->id,$seleccionadas))><span><b class="block text-sm">{{ $comunidad->nombre }}</b><small class="text-slate-500">{{ $comunidad->territorio }}</small></span></label>@endforeach</div><x-input-error :messages="$errors->get('comunidad_ids')" class="mt-2"/></div>
+ <div><x-input-label value="Tipo o sector"/><select name="tipo_necesidad_id" class="w-full"><option value="">Sin clasificar</option>@foreach($tiposNecesidad as $tipo)<option value="{{ $tipo->id }}" @selected(old('tipo_necesidad_id',$d?->tipo_necesidad_id)==$tipo->id)>{{ $tipo->nombre }}</option>@endforeach</select></div>
+ <div><x-input-label value="Título de la demanda"/><x-text-input name="titulo" class="w-full" :value="old('titulo',$d?->titulo)" required/></div>
+ <div><x-input-label value="Prioridad"/><select name="prioridad" class="w-full">@foreach(['baja'=>'Baja','media'=>'Media','alta'=>'Alta','critica'=>'Crítica'] as $v=>$l)<option value="{{ $v }}" @selected(old('prioridad',$d?->prioridad??'media')===$v)>{{ $l }}</option>@endforeach</select></div>
+ <div><x-input-label value="Estado"/><select name="estado" class="w-full">@foreach(['identificada'=>'Identificada','priorizada'=>'Priorizada','en_gestion'=>'En gestión','en_ejecucion'=>'En ejecución','resuelta'=>'Resuelta','postergada'=>'Postergada'] as $v=>$l)<option value="{{ $v }}" @selected(old('estado',$d?->estado??'identificada')===$v)>{{ $l }}</option>@endforeach</select></div>
+ <div><x-input-label value="Fecha de identificación"/><x-text-input type="date" name="fecha_identificacion" class="w-full" :value="old('fecha_identificacion',$d?->fecha_identificacion?->format('Y-m-d'))"/></div>
+ <div><x-input-label value="Fecha límite general"/><x-text-input type="date" name="fecha_limite" class="w-full" :value="old('fecha_limite',$d?->fecha_limite?->format('Y-m-d'))"/></div>
+ <div><x-input-label value="Ubicación específica"/><x-text-input name="ubicacion_especifica" class="w-full" :value="old('ubicacion_especifica',$d?->ubicacion_especifica)"/></div>
+ <div><x-input-label value="Fuente"/><x-text-input name="fuente" class="w-full" :value="old('fuente',$d?->fuente)"/></div>
+ @foreach(['descripcion'=>'Descripción','resultado_esperado'=>'Resultado esperado','proximo_paso'=>'Próximo paso','problema_bloqueo'=>'Problema o bloqueo'] as $campo=>$label)<div class="md:col-span-2"><x-input-label :value="$label"/><textarea name="{{ $campo }}" rows="3" class="w-full">{{ old($campo,$d?->{$campo}) }}</textarea></div>@endforeach
+</div>
+<div class="mt-6 flex gap-3"><x-primary-button>Guardar demanda</x-primary-button><a href="{{ $d?route('demandas.show',$d):route('demandas.index') }}" class="ui-btn-secondary">Cancelar</a></div>

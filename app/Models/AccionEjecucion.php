@@ -32,7 +32,7 @@ class AccionEjecucion extends Model
     protected $table = 'acciones_ejecucion';
 
     protected $fillable = [
-        'accion_compromiso_id', 'responsable_id', 'titulo', 'descripcion', 'estado',
+        'demanda_id', 'responsable_id', 'titulo', 'descripcion', 'estado',
         'avance', 'ultima_actualizacion_avance', 'fecha_inicio', 'fecha_limite', 'resultado_esperado', 'proximo_paso', 'resultado', 'evidencias',
     ];
 
@@ -43,9 +43,9 @@ class AccionEjecucion extends Model
         'ultima_actualizacion_avance' => 'datetime',
     ];
 
-    public function compromiso(): BelongsTo
+    public function demanda(): BelongsTo
     {
-        return $this->belongsTo(AccionCompromiso::class, 'accion_compromiso_id');
+        return $this->belongsTo(Demanda::class);
     }
 
     public function responsable(): BelongsTo
