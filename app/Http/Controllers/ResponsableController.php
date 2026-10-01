@@ -9,8 +9,8 @@ use App\Notifications\UserCredentialsNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 
 class ResponsableController extends Controller
 {
@@ -22,10 +22,15 @@ class ResponsableController extends Controller
                 ->orWhere('cargo_rol', 'like', "%$value%")
                 ->orWhere('institucion', 'like', "%$value%")))
             ->orderBy('nombre_completo')->paginate(15)->withQueryString();
+
         return view('responsables.index', compact('responsables'));
     }
 
-    public function create() { return view('responsables.create', ['areas' => $this->catalogoAreas(), 'instituciones' => $this->catalogoInstituciones()]); }
+    public function create()
+    {
+        return view('responsables.create', ['areas' => $this->catalogoAreas(), 'instituciones' => $this->catalogoInstituciones()]);
+    }
+
     public function store(Request $request)
     {
         $data = $this->validar($request);
@@ -43,18 +48,52 @@ class ResponsableController extends Controller
             }
             $responsable = Responsable::create($data);
             $responsable->areas()->sync($areaIds);
+
             return $user;
         });
         if ($user) {
             $user->notify(new UserCredentialsNotification($temporaryPassword));
             $user->update(['credentials_sent_at' => now()]);
         }
+
         return redirect()->route('responsables.index')->with('success', $user ? 'Responsable y cuenta de acceso creados.' : 'Responsable registrado.');
     }
-    public function show(Responsable $responsable) { $responsable->load('accionesEjecucion.demanda.comunidades'); return view('responsables.show', compact('responsable')); }
-    public function edit(Responsable $responsable) { $responsable->load('areas');return view('responsables.edit', ['responsable' => $responsable, 'areas' => $this->catalogoAreas(), 'instituciones' => $this->catalogoInstituciones()]); }
-    public function update(Request $request, Responsable $responsable) { $data=$this->validar($request,$responsable);DB::transaction(function()use($responsable,&$data){$areaIds=$this->resolverAreas($data);$responsable->update($data);$responsable->areas()->sync($areaIds);});return redirect()->route('responsables.index')->with('success', 'Responsable actualizado.'); }
-    public function destroy(Responsable $responsable) { $responsable->delete(); return back()->with('success', 'Responsable eliminado.'); }
+
+    public function show(Responsable $responsable)
+    {
+        $responsable->load('accionesEjecucion.demanda.comunidades');
+
+        return view('responsables.show', compact('responsable'));
+    }
+
+    public function edit(Responsable $responsable)
+    {
+        $responsable->load('areas');
+
+        return view('responsables.edit', ['responsable' => $responsable, 'areas' => $this->catalogoAreas(), 'instituciones' => $this->catalogoInstituciones()]);
+    }
+
+    public function update(Request $request, Responsable $responsable)
+    {
+        $data = $this->validar($request, $responsable);
+        DB::transaction(function () use ($responsable, &$data) {
+            $areaIds = $this->resolverAreas($data);
+            $responsable->update($data);
+            $responsable->areas()->sync($areaIds);
+        });
+
+        return redirect()->route('responsables.index')->with('success', 'Responsable actualizado.');
+    }
+
+    public function destroy(Responsable $responsable)
+    {
+        DB::transaction(function () use ($responsable) {
+            $responsable->user?->update(['is_active' => false]);
+            $responsable->delete();
+        });
+
+        return back()->with('success', 'Responsable eliminado y su acceso fue desactivado.');
+    }
 
     private function validar(Request $request, ?Responsable $responsable = null): array
     {
@@ -94,6 +133,7 @@ class ResponsableController extends Controller
         $ids = $ids->unique()->values();
         $data['area'] = Area::whereIn('id', $ids)->orderBy('nombre')->pluck('nombre')->join(', ');
         unset($data['area_ids'], $data['area_nueva']);
+
         return $ids->all();
     }
 

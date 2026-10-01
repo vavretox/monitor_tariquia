@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class HistorialAvance extends Model
 {
     protected $table = 'historial_avances';
+
     protected $guarded = [];
 
     public function accion()

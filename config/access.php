@@ -3,7 +3,6 @@
 return [
     'modules' => [
         'dashboard' => ['label' => 'Mapa y panel', 'actions' => ['view' => 'Ver']],
-        'proyectos' => ['label' => 'Proyectos', 'actions' => ['view' => 'Ver', 'create' => 'Crear', 'edit' => 'Editar', 'delete' => 'Eliminar']],
         'comunidades' => ['label' => 'Comunidades', 'actions' => ['view' => 'Ver', 'create' => 'Crear', 'edit' => 'Editar', 'delete' => 'Eliminar']],
         'demandas' => ['label' => 'Demandas', 'actions' => ['view' => 'Ver', 'create' => 'Crear', 'edit' => 'Editar', 'delete' => 'Eliminar']],
         'acciones' => ['label' => 'Acciones', 'actions' => ['view' => 'Ver', 'create' => 'Crear', 'edit' => 'Editar', 'delete' => 'Eliminar']],
@@ -12,4 +11,3 @@ return [
         'roles' => ['label' => 'Roles y permisos', 'actions' => ['view' => 'Ver', 'edit' => 'Editar']],
     ],
 ];
-

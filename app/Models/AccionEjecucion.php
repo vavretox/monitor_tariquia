@@ -17,8 +17,10 @@ class AccionEjecucion extends Model
     {
         static::addGlobalScope('responsable', function ($query) {
             $user = auth()->user();
-            $id = $user?->hasRole('responsable') ? $user->responsable?->id : null;
-            if ($id) $query->whereHas('responsables', fn ($responsables) => $responsables->where('responsables.id', $id));
+            if ($user?->hasRole('responsable')) {
+                $id = $user->responsable?->id ?? 0;
+                $query->whereHas('responsables', fn ($responsables) => $responsables->where('responsables.id', $id));
+            }
         });
         static::created(function ($model) {
             $user = auth()->user();
@@ -29,6 +31,7 @@ class AccionEjecucion extends Model
             }
         });
     }
+
     protected $table = 'acciones_ejecucion';
 
     protected $fillable = [

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 class SendOverdueActionNotifications extends Command
 {
     protected $signature = 'actions:notify-overdue {--date= : Fecha de evaluación YYYY-MM-DD}';
+
     protected $description = 'Envía alertas diarias a responsables con acciones vencidas no completadas';
 
     public function handle(): int
@@ -29,12 +30,16 @@ class SendOverdueActionNotifications extends Command
                     $daysOverdue = (int) $accion->fecha_limite->diffInDays($today);
                     foreach ($accion->responsables as $responsable) {
                         $user = $responsable->user;
-                        if (! $user || ! $user->is_active) continue;
+                        if (! $user || ! $user->is_active) {
+                            continue;
+                        }
                         $alreadySent = DB::table('overdue_action_notifications')
                             ->where('accion_ejecucion_id', $accion->id)
                             ->where('user_id', $user->id)
                             ->whereDate('notified_on', $today)->exists();
-                        if ($alreadySent) continue;
+                        if ($alreadySent) {
+                            continue;
+                        }
 
                         $user->notify(new OverdueActionNotification($accion, $daysOverdue));
                         DB::table('overdue_action_notifications')->insert([
@@ -48,6 +53,7 @@ class SendOverdueActionNotifications extends Command
             });
 
         $this->info("Notificaciones enviadas: {$sent}");
+
         return self::SUCCESS;
     }
 }

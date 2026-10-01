@@ -6,7 +6,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleManagementController extends Controller
@@ -21,7 +20,7 @@ class RoleManagementController extends Controller
     public function create(): View
     {
         return view('admin.roles.edit', [
-            'role' => new Role(),
+            'role' => new Role,
             'modules' => config('access.modules'),
             'selected' => [],
         ]);
