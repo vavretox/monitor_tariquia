@@ -22,8 +22,44 @@ class ResponsableValidationTest extends TestCase
         $response = $this->actingAs($user)->post(route('responsables.store'), []);
 
         $response->assertSessionHasErrors([
-            'nombre_completo', 'cargo_rol', 'institucion', 'telefono', 'email',
+            'nombre_completo', 'cargo_rol', 'institucion',
         ]);
+    }
+
+    public function test_responsible_person_can_be_created_without_contact_details(): void
+    {
+        $role = Role::create(['name' => 'admin']);
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $user->assignRole($role);
+
+        $this->actingAs($user)->post(route('responsables.store'), [
+            'nombre_completo' => 'Responsable sin contacto',
+            'cargo_rol' => 'Técnico',
+            'institucion' => 'Institución de prueba',
+            'telefono' => '',
+            'email' => '',
+        ])->assertSessionHasNoErrors()->assertRedirect(route('responsables.index'));
+
+        $this->assertDatabaseHas('responsables', [
+            'nombre_completo' => 'Responsable sin contacto',
+            'telefono' => null,
+            'email' => null,
+        ]);
+    }
+
+    public function test_email_is_required_when_creating_an_access_account(): void
+    {
+        $role = Role::create(['name' => 'admin']);
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $user->assignRole($role);
+
+        $this->actingAs($user)->post(route('responsables.store'), [
+            'nombre_completo' => 'Responsable con cuenta',
+            'cargo_rol' => 'Técnico',
+            'institucion' => 'Institución de prueba',
+            'crear_usuario' => '1',
+            'email' => '',
+        ])->assertSessionHasErrors(['email'])->assertSessionDoesntHaveErrors(['telefono']);
     }
 
     public function test_responsible_person_can_be_created_without_an_area(): void

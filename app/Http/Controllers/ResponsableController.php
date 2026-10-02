@@ -110,9 +110,9 @@ class ResponsableController extends Controller
             'area_ids' => ['nullable', 'array'],
             'area_ids.*' => ['integer', 'distinct', 'exists:areas,id'],
             'area_nueva' => ['nullable', 'string', 'max:255'],
-            'telefono' => ['required', 'string', 'max:50'],
+            'telefono' => ['nullable', 'string', 'max:50'],
             'crear_usuario' => ['nullable', 'boolean'],
-            'email' => ['required', 'email:rfc', 'max:255', Rule::unique('responsables')->ignore($responsable), Rule::unique('users')->ignore($responsable?->user_id)],
+            'email' => ['nullable', Rule::requiredIf($request->boolean('crear_usuario')), 'email:rfc', 'max:255', Rule::unique('responsables')->ignore($responsable), Rule::unique('users')->ignore($responsable?->user_id)],
             'institucion' => ['required', 'string', 'max:255'],
             'institucion_nueva' => ['nullable', 'required_if:institucion,__nueva__', 'string', 'max:255'],
         ]);
