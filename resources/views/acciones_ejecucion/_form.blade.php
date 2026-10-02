@@ -1,6 +1,23 @@
 @csrf @php($x=$accionEjecucion??null)
 <div class="grid md:grid-cols-2 gap-5">
-<div class="md:col-span-2"><x-input-label value="Demanda"/><select name="demanda_id" class="w-full" required>@foreach($demandas as $c)<option value="{{ $c->id }}" @selected(old('demanda_id',$x?->demanda_id??$demandaId??null)==$c->id)>{{ $c->titulo }} — {{ $c->comunidades->pluck('nombre')->join(', ') }}</option>@endforeach</select></div>
+<div class="md:col-span-2"><x-input-label value="Demanda"/><select id="demanda_id" name="demanda_id" class="w-full" required>@foreach($demandas as $c)<option value="{{ $c->id }}" @selected(old('demanda_id',$x?->demanda_id??$demandaId??null)==$c->id)>{{ $c->titulo }} — {{ $c->comunidades->pluck('nombre')->join(', ') }}</option>@endforeach</select></div>
+<div class="md:col-span-2">
+ <x-input-label value="Comunidades involucradas en esta acción"/><p class="mb-2 text-xs text-slate-500">Solo aparecen las comunidades definidas en la demanda. Selecciona una o varias.</p>
+ @php($comunidadesSeleccionadas=collect(old('comunidad_ids',$x?->comunidades?->pluck('id')->all()??[]))->map(fn($id)=>(int)$id)->all())
+ <div id="comunidades-accion" class="grid gap-2 rounded-xl border bg-slate-50 p-3 sm:grid-cols-2 lg:grid-cols-3">
+  @foreach($demandas as $demanda)
+   @foreach($demanda->comunidades as $comunidad)
+    <label class="comunidad-opcion flex cursor-pointer gap-2 rounded-lg bg-white p-3 shadow-sm" data-demanda-id="{{ $demanda->id }}">
+     <input class="comunidad-check mt-1 rounded" type="checkbox" name="comunidad_ids[]" value="{{ $comunidad->id }}" @checked(in_array($comunidad->id,$comunidadesSeleccionadas))>
+     <span><b class="block text-sm">{{ $comunidad->nombre }}</b><small class="text-slate-500">{{ $comunidad->territorio }}</small></span>
+    </label>
+   @endforeach
+  @endforeach
+ </div>
+ <p id="comunidades-vacias" class="mt-2 hidden text-sm text-amber-700">La demanda seleccionada no tiene comunidades asociadas.</p>
+ <x-input-error :messages="$errors->get('comunidad_ids')" class="mt-2"/>
+ <x-input-error :messages="$errors->get('comunidad_ids.*')" class="mt-2"/>
+</div>
 <div><x-input-label value="Acción a ejecutar"/><x-text-input name="titulo" class="w-full" :value="old('titulo',$x?->titulo)" required/></div>
 <div class="md:col-span-2">
  <x-input-label value="Responsables de la acción"/><p class="mb-2 text-xs text-slate-500">Selecciona uno o varios responsables.</p>
@@ -43,6 +60,9 @@
 </div><div class="mt-6 flex gap-3"><x-primary-button>Guardar acción</x-primary-button><a href="{{ $x ? route('demandas.show',$x->demanda_id) : route('acciones.index') }}" class="ui-btn-secondary">Cancelar</a></div>
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
+ const demanda=document.getElementById('demanda_id'),communityOptions=[...document.querySelectorAll('.comunidad-opcion')],emptyCommunities=document.getElementById('comunidades-vacias');
+ const updateCommunities=()=>{let visible=0;communityOptions.forEach(option=>{const show=option.dataset.demandaId===demanda.value;option.classList.toggle('hidden',!show);option.querySelector('input').disabled=!show;if(show)visible++});emptyCommunities.classList.toggle('hidden',visible!==0);};
+ demanda?.addEventListener('change',()=>{communityOptions.forEach(option=>{if(option.dataset.demandaId!==demanda.value)option.querySelector('input').checked=false});updateCommunities()});updateCommunities();
  const search=document.getElementById('buscar-responsable'),options=[...document.querySelectorAll('.responsable-opcion')],checks=[...document.querySelectorAll('.responsable-check')],count=document.getElementById('responsables-contador'),summary=document.getElementById('responsables-resumen'),names=document.getElementById('responsables-nombres'),results=document.getElementById('responsables-resultados'),empty=document.getElementById('responsables-sin-resultados');
  const normalize=value=>(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  const update=()=>{const selected=checks.filter(item=>item.checked);count.textContent=selected.length;summary.textContent=selected.length?selected.length+' responsable'+(selected.length===1?' seleccionado':'s seleccionados'):'Seleccionar responsables';names.textContent=selected.map(item=>item.dataset.nombre).join(', ');options.forEach(option=>option.classList.toggle('ring-2',option.querySelector('input').checked));};

@@ -61,6 +61,11 @@ class AccionEjecucion extends Model
         return $this->belongsToMany(Responsable::class, 'accion_ejecucion_responsable')->withTimestamps();
     }
 
+    public function comunidades(): BelongsToMany
+    {
+        return $this->belongsToMany(Comunidad::class, 'accion_ejecucion_comunidad')->withTimestamps();
+    }
+
     public function bitacoras(): HasMany
     {
         return $this->hasMany(AccionBitacora::class, 'accion_ejecucion_id')->latest('fecha_hora');

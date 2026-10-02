@@ -1,7 +1,7 @@
 <x-app-layout>
 <x-slot name="header">
  <div class="flex flex-wrap items-start justify-between gap-3">
-  <div><p class="text-sm font-semibold text-emerald-700">Acciones / Bitácora</p><h2 class="text-xl font-bold">{{ $accion->titulo }}</h2><p class="text-sm text-slate-500">{{ $accion->demanda?->titulo }} · {{ $accion->demanda?->comunidades?->pluck('nombre')->join(', ') }}</p></div>
+  <div><p class="text-sm font-semibold text-emerald-700">Acciones / Bitácora</p><h2 class="text-xl font-bold">{{ $accion->titulo }}</h2><p class="text-sm text-slate-500">{{ $accion->demanda?->titulo }} · {{ $accion->comunidades->pluck('nombre')->join(', ') }}</p></div>
   <div class="flex gap-2"><a href="{{ route('acciones.index') }}" class="ui-btn-secondary">Volver a acciones</a>@can('acciones.edit')<a href="{{ route('acciones.edit',$accion) }}" class="ui-btn-info">Editar acción</a>@endcan</div>
  </div>
 </x-slot>
@@ -12,6 +12,7 @@
   <div class="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Información de la acción</p><h3 class="text-lg font-bold text-slate-900">{{ $accion->titulo }}</h3></div><div class="flex gap-2"><span class="ui-badge bg-slate-100 text-slate-700">{{ ucfirst(str_replace('_',' ',$accion->estado)) }}</span><span class="ui-badge bg-emerald-100 text-emerald-700">{{ $accion->avance }}%</span></div></div>
   <div class="grid gap-4 text-sm md:grid-cols-4">
    <div><b class="block text-xs uppercase text-slate-500">Responsables</b>{{ $accion->responsables->pluck('nombre_completo')->join(', ')?:'Sin responsable' }}</div>
+   <div><b class="block text-xs uppercase text-slate-500">Comunidades involucradas</b>{{ $accion->comunidades->pluck('nombre')->join(', ')?:'Sin comunidad' }}</div>
    <div><b class="block text-xs uppercase text-slate-500">Inicio</b>{{ $accion->fecha_inicio?->format('d/m/Y')??'Sin definir' }}</div>
    <div><b class="block text-xs uppercase text-slate-500">Fecha límite</b>{{ $accion->fecha_limite?->format('d/m/Y')??'Sin definir' }}</div>
    <div><b class="block text-xs uppercase text-slate-500">Registros</b>{{ $accion->bitacoras->count() }} entradas</div>

@@ -27,7 +27,7 @@ class DemandaController extends Controller
 
     public function show(Demanda $demanda)
     {
-        $demanda->load(['tipo', 'comunidades', 'acciones.responsables']);
+        $demanda->load(['tipo', 'comunidades', 'acciones.responsables', 'acciones.comunidades']);
 
         return view('demandas.show', compact('demanda'));
     }

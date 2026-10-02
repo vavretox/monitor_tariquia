@@ -21,6 +21,11 @@ class Comunidad extends Model
         return $this->belongsToMany(Demanda::class, 'comunidad_demanda')->withTimestamps();
     }
 
+    public function acciones()
+    {
+        return $this->belongsToMany(AccionEjecucion::class, 'accion_ejecucion_comunidad')->withTimestamps();
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logAll()->logOnlyDirty();

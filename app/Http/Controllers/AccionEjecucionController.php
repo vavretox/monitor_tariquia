@@ -17,7 +17,7 @@ class AccionEjecucionController extends Controller
 {
     public function index(Request $request): View
     {
-        $acciones = AccionEjecucion::with(['demanda.comunidades', 'responsables'])->withCount('bitacoras')
+        $acciones = AccionEjecucion::with(['demanda.comunidades', 'comunidades', 'responsables'])->withCount('bitacoras')
             ->when($request->filled('buscar'), fn ($query) => $query->where('titulo', 'like', '%'.$request->buscar.'%'))
             ->when($request->filled('estado'), fn ($query) => $query->where('estado', $request->estado))
             ->latest()->paginate(15)->withQueryString();
@@ -28,7 +28,7 @@ class AccionEjecucionController extends Controller
 
     public function show(AccionEjecucion $accione): View
     {
-        $accione->load(['demanda.comunidades', 'responsables', 'bitacoras.usuario', 'bitacoras.fotos']);
+        $accione->load(['demanda.comunidades', 'comunidades', 'responsables', 'bitacoras.usuario', 'bitacoras.fotos']);
 
         return view('acciones_ejecucion.show', ['accion' => $accione]);
     }
@@ -42,13 +42,15 @@ class AccionEjecucionController extends Controller
     {
         $data = $this->validar($request);
         $responsables = $data['responsable_ids'] ?? [];
-        unset($data['responsable_ids']);
+        $comunidades = $data['comunidad_ids'];
+        unset($data['responsable_ids'], $data['comunidad_ids']);
         $data['responsable_id'] = $responsables[0] ?? null;
         $data['ultima_actualizacion_avance'] = now();
 
-        $accion = DB::transaction(function () use ($data, $responsables) {
+        $accion = DB::transaction(function () use ($data, $responsables, $comunidades) {
             $accion = AccionEjecucion::create($data);
             $accion->responsables()->sync($responsables);
+            $accion->comunidades()->sync($comunidades);
 
             return $accion;
         });
@@ -58,7 +60,7 @@ class AccionEjecucionController extends Controller
 
     public function edit(AccionEjecucion $accione): View
     {
-        $accione->load('responsables');
+        $accione->load(['responsables', 'comunidades']);
 
         return view('acciones_ejecucion.edit', ['accionEjecucion' => $accione] + $this->catalogos());
     }
@@ -67,15 +69,17 @@ class AccionEjecucionController extends Controller
     {
         $data = $this->validar($request);
         $responsables = $data['responsable_ids'] ?? [];
-        unset($data['responsable_ids']);
+        $comunidades = $data['comunidad_ids'];
+        unset($data['responsable_ids'], $data['comunidad_ids']);
         $data['responsable_id'] = $responsables[0] ?? null;
 
-        DB::transaction(function () use ($accione, $data, $responsables) {
+        DB::transaction(function () use ($accione, $data, $responsables, $comunidades) {
             if ($accione->estado !== $data['estado'] || (int) $accione->avance !== (int) ($data['avance'] ?? 0)) {
                 $data['ultima_actualizacion_avance'] = now();
             }
             $accione->update($data);
             $accione->responsables()->sync($responsables);
+            $accione->comunidades()->sync($comunidades);
         });
 
         return redirect()->route('acciones.show', $accione)->with('success', 'Acción actualizada correctamente.');
@@ -99,6 +103,13 @@ class AccionEjecucionController extends Controller
     {
         return $request->validate([
             'demanda_id' => ['required', 'exists:demandas,id'],
+            'comunidad_ids' => ['required', 'array', 'min:1'],
+            'comunidad_ids.*' => [
+                'integer', 'distinct',
+                Rule::exists('comunidad_demanda', 'comunidad_id')->where(
+                    fn ($query) => $query->where('demanda_id', $request->input('demanda_id'))
+                ),
+            ],
             'responsable_ids' => ['nullable', 'array'],
             'responsable_ids.*' => ['integer', 'distinct', 'exists:responsables,id'],
             'titulo' => ['required', 'string', 'max:255'],
