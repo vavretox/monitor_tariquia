@@ -22,8 +22,28 @@ class ResponsableValidationTest extends TestCase
         $response = $this->actingAs($user)->post(route('responsables.store'), []);
 
         $response->assertSessionHasErrors([
-            'nombre_completo', 'cargo_rol', 'area_ids', 'institucion', 'telefono', 'email',
+            'nombre_completo', 'cargo_rol', 'institucion', 'telefono', 'email',
         ]);
+    }
+
+    public function test_responsible_person_can_be_created_without_an_area(): void
+    {
+        $role = Role::create(['name' => 'admin']);
+        $user = User::factory()->create(['email_verified_at' => now()]);
+        $user->assignRole($role);
+
+        $this->actingAs($user)->post(route('responsables.store'), [
+            'nombre_completo' => 'Responsable sin área',
+            'cargo_rol' => 'Técnico',
+            'institucion' => '__nueva__',
+            'institucion_nueva' => 'Institución de prueba',
+            'telefono' => '60000001',
+            'email' => 'sin-area@example.test',
+        ])->assertRedirect(route('responsables.index'));
+
+        $responsable = Responsable::where('email', 'sin-area@example.test')->firstOrFail();
+        $this->assertNull($responsable->area);
+        $this->assertCount(0, $responsable->areas);
     }
 
     public function test_new_area_and_institution_can_be_created_from_responsible_person_form(): void

@@ -29,12 +29,24 @@ class RolesAndUsersSeeder extends Seeder
             'responsables.view',
         ]);
         Role::findByName('responsable')->syncPermissions(['dashboard.view', 'demandas.view', 'demandas.create', 'demandas.edit', 'acciones.view', 'acciones.create', 'acciones.edit']);
-        $admin = User::firstOrCreate(['email' => 'admin@tariquia.test'], ['name' => 'Administrador', 'password' => Hash::make('password'), 'email_verified_at' => now()]);
-        $admin->assignRole('admin');
-        $tec = User::firstOrCreate(['email' => 'tecnico@tariquia.test'], ['name' => 'Técnico', 'password' => Hash::make('password'), 'email_verified_at' => now()]);
-        $tec->assignRole('tecnico');
-        $obs = User::firstOrCreate(['email' => 'observador@tariquia.test'], ['name' => 'Observador', 'password' => Hash::make('password'), 'email_verified_at' => now()]);
-        $obs->assignRole('observador');
+        $adminEmail = config('app.seed_admin_email');
+        $adminPassword = config('app.seed_admin_password');
+        if (app()->environment('testing')) {
+            $adminEmail ??= 'admin@tariquia.test';
+            $adminPassword ??= 'testing-password';
+        }
+        if ($adminEmail && $adminPassword) {
+            $admin = User::firstOrCreate(
+                ['email' => $adminEmail],
+                [
+                    'name' => 'Administrador',
+                    'password' => Hash::make($adminPassword),
+                    'email_verified_at' => now(),
+                    'must_change_password' => ! app()->environment('testing'),
+                ],
+            );
+            $admin->assignRole('admin');
+        }
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

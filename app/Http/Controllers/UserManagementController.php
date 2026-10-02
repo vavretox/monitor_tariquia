@@ -38,25 +38,28 @@ class UserManagementController extends Controller
         $data = $this->validateUser($request);
         $temporaryPassword = Str::password(14);
 
+        $user = DB::transaction(function () use ($data, $temporaryPassword) {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => Str::lower($data['email']),
+                'password' => $temporaryPassword,
+                'is_active' => $data['is_active'],
+                'must_change_password' => true,
+                'email_verified_at' => now(),
+            ]);
+            $user->syncRoles([$data['role']]);
+
+            return $user;
+        });
+
         try {
-            DB::transaction(function () use ($data, $temporaryPassword): void {
-                $user = User::create([
-                    'name' => $data['name'],
-                    'email' => Str::lower($data['email']),
-                    'password' => $temporaryPassword,
-                    'is_active' => $data['is_active'],
-                    'must_change_password' => true,
-                    'email_verified_at' => now(),
-                ]);
-                $user->syncRoles([$data['role']]);
-                $user->notify(new UserCredentialsNotification($temporaryPassword));
-                $user->update(['credentials_sent_at' => now()]);
-            });
+            $user->notify(new UserCredentialsNotification($temporaryPassword));
+            $user->update(['credentials_sent_at' => now()]);
         } catch (\Throwable $exception) {
             report($exception);
 
-            return back()->withInput($request->except('role'))
-                ->withErrors(['email' => 'No fue posible enviar las credenciales por correo. Verifique la configuración SMTP o inténtelo nuevamente.']);
+            return redirect()->route('admin.users.index')
+                ->with('warning', 'El usuario fue creado, pero el correo no pudo enviarse. Puede reenviar las credenciales desde este listado.');
         }
 
         return redirect()->route('admin.users.index')->with('success', 'Usuario creado y credenciales enviadas a su correo.');

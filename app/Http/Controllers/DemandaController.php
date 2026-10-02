@@ -8,6 +8,7 @@ use App\Models\TipoNecesidad;
 use App\Support\MonitoringCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class DemandaController extends Controller
@@ -26,7 +27,7 @@ class DemandaController extends Controller
 
     public function show(Demanda $demanda)
     {
-        $demanda->load(['tipo', 'comunidades', 'acciones.responsables', 'acciones.archivos', 'acciones.historialAvances.usuario']);
+        $demanda->load(['tipo', 'comunidades', 'acciones.responsables']);
 
         return view('demandas.show', compact('demanda'));
     }
@@ -69,7 +70,10 @@ class DemandaController extends Controller
 
     public function destroy(Demanda $demanda)
     {
-        $demanda->delete();
+        $paths = $demanda->acciones()->with('bitacoras.fotos')->get()
+            ->flatMap->bitacoras->flatMap->fotos->pluck('ruta')->all();
+        DB::transaction(fn () => $demanda->delete());
+        Storage::disk('local')->delete($paths);
 
         return redirect()->route('demandas.index')->with('success', 'Demanda eliminada.');
     }

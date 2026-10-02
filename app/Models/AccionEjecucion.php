@@ -36,7 +36,7 @@ class AccionEjecucion extends Model
 
     protected $fillable = [
         'demanda_id', 'responsable_id', 'titulo', 'descripcion', 'estado',
-        'avance', 'ultima_actualizacion_avance', 'fecha_inicio', 'fecha_limite', 'resultado_esperado', 'proximo_paso', 'resultado', 'evidencias',
+        'avance', 'ultima_actualizacion_avance', 'fecha_inicio', 'fecha_limite', 'resultado_esperado', 'proximo_paso', 'resultado',
     ];
 
     protected $casts = [
@@ -61,9 +61,9 @@ class AccionEjecucion extends Model
         return $this->belongsToMany(Responsable::class, 'accion_ejecucion_responsable')->withTimestamps();
     }
 
-    public function archivos(): HasMany
+    public function bitacoras(): HasMany
     {
-        return $this->hasMany(AccionEjecucionArchivo::class, 'accion_ejecucion_id');
+        return $this->hasMany(AccionBitacora::class, 'accion_ejecucion_id')->latest('fecha_hora');
     }
 
     public function getDiasRetrasoAttribute(): int
@@ -75,10 +75,5 @@ class AccionEjecucion extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logAll()->logOnlyDirty();
-    }
-
-    public function historialAvances(): HasMany
-    {
-        return $this->hasMany(HistorialAvance::class, 'accion_ejecucion_id')->latest();
     }
 }

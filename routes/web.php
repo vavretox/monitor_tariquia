@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\AccionBitacoraController;
 use App\Http\Controllers\AccionEjecucionController;
 use App\Http\Controllers\ComunidadController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DemandaController;
-use App\Http\Controllers\EvidenciaArchivoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResponsableController;
 use App\Http\Controllers\RoleManagementController;
@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::pattern('comunidad', '[0-9]+');
 Route::pattern('accione', '[0-9]+');
+Route::pattern('bitacora', '[0-9]+');
+Route::pattern('foto', '[0-9]+');
 Route::pattern('responsable', '[0-9]+');
 Route::pattern('demanda', '[0-9]+');
 Route::pattern('archivo', '[0-9]+');
@@ -43,12 +45,18 @@ Route::middleware(['auth', 'active', 'verified', 'password.changed'])->group(fun
     Route::resource('responsables', ResponsableController::class)->only(['create', 'store'])->middleware('permission:responsables.create');
     Route::resource('responsables', ResponsableController::class)->only(['edit', 'update'])->middleware('permission:responsables.edit');
     Route::resource('responsables', ResponsableController::class)->only(['destroy'])->middleware('permission:responsables.delete');
-    Route::resource('acciones', AccionEjecucionController::class)->only(['index'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.view');
+    Route::resource('acciones', AccionEjecucionController::class)->only(['index', 'show'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.view');
     Route::resource('acciones', AccionEjecucionController::class)->only(['create', 'store'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.create');
     Route::resource('acciones', AccionEjecucionController::class)->only(['edit', 'update'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.edit');
     Route::resource('acciones', AccionEjecucionController::class)->only(['destroy'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.delete');
-    Route::get('evidencias/acciones/{archivo}', [EvidenciaArchivoController::class, 'accion'])
-        ->middleware('permission:acciones.view')->name('evidencias.acciones.descargar');
+    Route::get('acciones/{accione}/bitacora', [AccionBitacoraController::class, 'index'])
+        ->middleware('permission:acciones.view')->name('acciones.bitacoras.index');
+    Route::post('acciones/{accione}/bitacoras', [AccionBitacoraController::class, 'store'])
+        ->middleware('permission:acciones.edit')->name('acciones.bitacoras.store');
+    Route::delete('acciones/{accione}/bitacoras/{bitacora}', [AccionBitacoraController::class, 'destroy'])
+        ->middleware('permission:acciones.edit')->name('acciones.bitacoras.destroy');
+    Route::get('evidencias/bitacoras/{foto}', [AccionBitacoraController::class, 'foto'])
+        ->middleware('permission:acciones.view')->name('evidencias.bitacoras.foto');
 
     Route::prefix('administracion')->name('admin.')->group(function () {
         Route::get('usuarios', [UserManagementController::class, 'index'])->middleware('permission:users.view')->name('users.index');

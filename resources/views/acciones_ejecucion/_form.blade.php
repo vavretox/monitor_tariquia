@@ -1,4 +1,4 @@
-﻿@csrf @php($x=$accionEjecucion??null)
+@csrf @php($x=$accionEjecucion??null)
 <div class="grid md:grid-cols-2 gap-5">
 <div class="md:col-span-2"><x-input-label value="Demanda"/><select name="demanda_id" class="w-full" required>@foreach($demandas as $c)<option value="{{ $c->id }}" @selected(old('demanda_id',$x?->demanda_id??$demandaId??null)==$c->id)>{{ $c->titulo }} — {{ $c->comunidades->pluck('nombre')->join(', ') }}</option>@endforeach</select></div>
 <div><x-input-label value="Acción a ejecutar"/><x-text-input name="titulo" class="w-full" :value="old('titulo',$x?->titulo)" required/></div>
@@ -36,39 +36,9 @@
  <x-input-error :messages="$errors->get($campo)" class="mt-2"/>
 </div>
 @endforeach
-<div class="md:col-span-2">
- <x-input-label value="Evidencias / observaciones"/>
- <textarea name="evidencias" rows="3" class="w-full" placeholder="Describe aquí las evidencias o agrega observaciones relevantes.">{{ old('evidencias',$x?->evidencias) }}</textarea>
- <x-input-error :messages="$errors->get('evidencias')" class="mt-2"/>
-</div>
-<div class="md:col-span-2"><x-input-label value="Comentario de esta actualización"/><textarea name="comentario_avance" rows="2" class="w-full" placeholder="Explique brevemente qué cambió en el estado o seguimiento.">{{ old('comentario_avance') }}</textarea><p class="mt-1 text-xs text-slate-500">Al cambiar el estado, esta actualización quedará guardada en el historial.</p></div>
-<div class="md:col-span-2 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/50 p-4">
- <x-input-label value="Documentos de respaldo"/>
- <p class="mb-3 text-xs text-slate-600">Puedes seleccionar hasta 10 archivos JPG, JPEG, PNG, PDF, DOC o DOCX. Máximo 10 MB por archivo.</p>
- <input type="file" name="documentos[]" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" class="w-full rounded-lg border border-slate-300 bg-white p-2 text-sm">
- <x-input-error :messages="$errors->get('documentos')" class="mt-2"/>
- @foreach($errors->get('documentos.*') as $mensajes)
-  <x-input-error :messages="$mensajes" class="mt-2"/>
- @endforeach
- @if($x?->archivos?->isNotEmpty())
-  <div class="mt-4 border-t border-emerald-200 pt-4">
-   <p class="mb-2 text-sm font-semibold text-slate-700">Archivos cargados</p>
-   <div class="space-y-2">
-    @foreach($x->archivos as $archivo)
-     <label class="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2">
-      <span class="min-w-0">
-       <a href="{{ route('evidencias.acciones.descargar', $archivo) }}" class="block truncate text-sm font-semibold text-blue-700 hover:underline">{{ $archivo->nombre_original }}</a>
-       <small class="text-slate-500">{{ number_format(($archivo->tamano ?? 0) / 1024, 1) }} KB</small>
-      </span>
-      <span class="flex shrink-0 items-center gap-2 text-xs font-semibold text-red-700">
-       <input type="checkbox" name="eliminar_documentos[]" value="{{ $archivo->id }}" class="rounded border-slate-300 text-red-600">
-       Eliminar
-      </span>
-     </label>
-    @endforeach
-   </div>
-  </div>
- @endif
+<div class="md:col-span-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+ <b>Seguimiento mediante bitácora</b>
+ <p class="mt-1">Después de guardar la acción, registra los trabajos realizados, avances y fotografías desde la sección independiente Bitácora del módulo Acciones.</p>
 </div>
 </div><div class="mt-6 flex gap-3"><x-primary-button>Guardar acción</x-primary-button><a href="{{ $x ? route('demandas.show',$x->demanda_id) : route('acciones.index') }}" class="ui-btn-secondary">Cancelar</a></div>
 <script>

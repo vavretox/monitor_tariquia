@@ -33,11 +33,18 @@ class SendOverdueActionNotifications extends Command
                         if (! $user || ! $user->is_active) {
                             continue;
                         }
-                        $alreadySent = DB::table('overdue_action_notifications')
+                        $history = DB::table('overdue_action_notifications')
                             ->where('accion_ejecucion_id', $accion->id)
-                            ->where('user_id', $user->id)
-                            ->whereDate('notified_on', $today)->exists();
-                        if ($alreadySent) {
+                            ->where('user_id', $user->id);
+                        $firstNotification = (clone $history)->oldest('notified_on')->first();
+                        $alreadySent = (clone $history)->whereDate('notified_on', $today)->exists();
+                        $stateChanged = $firstNotification?->action_state !== null
+                            && $firstNotification->action_state !== $accion->estado;
+                        $hasNewLog = $firstNotification && $accion->bitacoras()
+                            ->where('created_at', '>=', Carbon::parse($firstNotification->created_at))
+                            ->exists();
+
+                        if ($alreadySent || $stateChanged || $hasNewLog) {
                             continue;
                         }
 
@@ -45,6 +52,7 @@ class SendOverdueActionNotifications extends Command
                         DB::table('overdue_action_notifications')->insert([
                             'accion_ejecucion_id' => $accion->id, 'user_id' => $user->id,
                             'notified_on' => $today->toDateString(), 'days_overdue' => $daysOverdue,
+                            'action_state' => $accion->estado,
                             'created_at' => now(), 'updated_at' => now(),
                         ]);
                         $sent++;

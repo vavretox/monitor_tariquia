@@ -52,8 +52,15 @@ class ResponsableController extends Controller
             return $user;
         });
         if ($user) {
-            $user->notify(new UserCredentialsNotification($temporaryPassword));
-            $user->update(['credentials_sent_at' => now()]);
+            try {
+                $user->notify(new UserCredentialsNotification($temporaryPassword));
+                $user->update(['credentials_sent_at' => now()]);
+            } catch (\Throwable $exception) {
+                report($exception);
+
+                return redirect()->route('responsables.index')
+                    ->with('warning', 'El responsable y su cuenta fueron creados, pero el correo no pudo enviarse. Use reenviar credenciales desde Usuarios.');
+            }
         }
 
         return redirect()->route('responsables.index')->with('success', $user ? 'Responsable y cuenta de acceso creados.' : 'Responsable registrado.');
@@ -100,9 +107,9 @@ class ResponsableController extends Controller
         $data = $request->validate([
             'nombre_completo' => ['required', 'string', 'max:255'],
             'cargo_rol' => ['required', 'string', 'max:255'],
-            'area_ids' => ['nullable', 'array', 'required_without:area_nueva'],
+            'area_ids' => ['nullable', 'array'],
             'area_ids.*' => ['integer', 'distinct', 'exists:areas,id'],
-            'area_nueva' => ['nullable', 'required_without:area_ids', 'string', 'max:255'],
+            'area_nueva' => ['nullable', 'string', 'max:255'],
             'telefono' => ['required', 'string', 'max:50'],
             'crear_usuario' => ['nullable', 'boolean'],
             'email' => ['required', 'email:rfc', 'max:255', Rule::unique('responsables')->ignore($responsable), Rule::unique('users')->ignore($responsable?->user_id)],
@@ -131,7 +138,7 @@ class ResponsableController extends Controller
             $ids->push($area->id);
         }
         $ids = $ids->unique()->values();
-        $data['area'] = Area::whereIn('id', $ids)->orderBy('nombre')->pluck('nombre')->join(', ');
+        $data['area'] = $ids->isEmpty() ? null : Area::whereIn('id', $ids)->orderBy('nombre')->pluck('nombre')->join(', ');
         unset($data['area_ids'], $data['area_nueva']);
 
         return $ids->all();

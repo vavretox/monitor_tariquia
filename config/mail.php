@@ -49,6 +49,18 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
+        'alerts' => [
+            'transport' => env('ALERT_MAIL_MAILER', 'smtp'),
+            'scheme' => env('ALERT_MAIL_SCHEME'),
+            'url' => env('ALERT_MAIL_URL'),
+            'host' => env('ALERT_MAIL_HOST', '127.0.0.1'),
+            'port' => env('ALERT_MAIL_PORT', 2525),
+            'username' => env('ALERT_MAIL_USERNAME'),
+            'password' => env('ALERT_MAIL_PASSWORD'),
+            'timeout' => (int) env('ALERT_MAIL_TIMEOUT', 15),
+            'local_domain' => env('ALERT_MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],
@@ -113,6 +125,11 @@ return [
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
+    ],
+
+    'alerts_from' => [
+        'address' => env('ALERT_MAIL_FROM_ADDRESS', 'alerts@example.com'),
+        'name' => env('ALERT_MAIL_FROM_NAME', env('APP_NAME', 'Laravel').' - Alertas'),
     ],
 
 ];

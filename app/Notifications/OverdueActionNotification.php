@@ -23,6 +23,8 @@ class OverdueActionNotification extends Notification
         $responsables = $this->accion->responsables->pluck('nombre_completo')->join(', ');
 
         return (new MailMessage)
+            ->mailer('alerts')
+            ->from(config('mail.alerts_from.address'), config('mail.alerts_from.name'))
             ->subject("Acción vencida: {$this->accion->titulo}")
             ->greeting("Hola, {$notifiable->name}")
             ->line('La siguiente acción continúa sin estado Completada después de su fecha límite.')
