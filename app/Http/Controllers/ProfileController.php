@@ -18,12 +18,21 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
+            'notificaciones' => $request->user()->notifications()->latest()->paginate(15),
+            'pendientes' => $request->user()->unreadNotifications()->count(),
         ]);
     }
 
     /**
      * Update the user's profile information.
      */
+    public function readNotification(Request $request, string $notification): RedirectResponse
+    {
+        $request->user()->notifications()->findOrFail($notification)->markAsRead();
+
+        return redirect()->route('profile.edit')->withFragment('notificaciones');
+    }
+
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $request->user()->fill($request->validated());

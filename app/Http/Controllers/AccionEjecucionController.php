@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccionEjecucion;
+use App\Models\Comunidad;
 use App\Models\Demanda;
 use App\Models\Responsable;
+use App\Models\TipoNecesidad;
 use App\Support\MonitoringCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,11 +21,16 @@ class AccionEjecucionController extends Controller
     {
         $acciones = AccionEjecucion::with(['demanda.comunidades', 'comunidades', 'responsables'])->withCount('bitacoras')
             ->when($request->filled('buscar'), fn ($query) => $query->where('titulo', 'like', '%'.$request->buscar.'%'))
+            ->when($request->filled('comunidad_id'), fn ($query) => $query->whereHas('comunidades', fn ($communityQuery) => $communityQuery->where('comunidades.id', $request->input('comunidad_id'))))
+            ->when($request->filled('tipo_necesidad_id'), fn ($query) => $query->whereHas('demanda', fn ($demandQuery) => $demandQuery->where('tipo_necesidad_id', $request->input('tipo_necesidad_id'))))
             ->when($request->filled('estado'), fn ($query) => $query->where('estado', $request->estado))
             ->latest()->paginate(15)->withQueryString();
         $estadosAccion = MonitoringCatalog::ACTION_STATES;
 
-        return view('acciones_ejecucion.index', compact('acciones', 'estadosAccion'));
+        $comunidades = Comunidad::orderBy('nombre')->get();
+        $tiposNecesidad = TipoNecesidad::orderBy('nombre')->get();
+
+        return view('acciones_ejecucion.index', compact('acciones', 'estadosAccion', 'comunidades', 'tiposNecesidad'));
     }
 
     public function show(AccionEjecucion $accione): View
@@ -51,6 +58,7 @@ class AccionEjecucionController extends Controller
             $accion = AccionEjecucion::create($data);
             $accion->responsables()->sync($responsables);
             $accion->comunidades()->sync($comunidades);
+            app(\App\Support\MonthlyReportControl::class)->synchronize();
 
             return $accion;
         });
@@ -77,9 +85,24 @@ class AccionEjecucionController extends Controller
             if ($accione->estado !== $data['estado'] || (int) $accione->avance !== (int) ($data['avance'] ?? 0)) {
                 $data['ultima_actualizacion_avance'] = now();
             }
+            app(\App\Support\MonthlyReportControl::class)->synchronize();
             $accione->update($data);
+            $antes = [
+                'responsables' => $accione->responsables()->pluck('nombre_completo')->join(', '),
+                'comunidades' => $accione->comunidades()->pluck('nombre')->join(', '),
+            ];
             $accione->responsables()->sync($responsables);
             $accione->comunidades()->sync($comunidades);
+            app(\App\Support\MonthlyReportControl::class)->synchronize();
+            $despues = [
+                'responsables' => $accione->responsables()->pluck('nombre_completo')->join(', '),
+                'comunidades' => $accione->comunidades()->pluck('nombre')->join(', '),
+            ];
+            if ($antes !== $despues) {
+                activity()->performedOn($accione)->causedBy(auth()->user())->event('updated')
+                    ->withProperties(['old' => $antes, 'attributes' => $despues])
+                    ->log('Asignación actualizada');
+            }
         });
 
         return redirect()->route('acciones.show', $accione)->with('success', 'Acción actualizada correctamente.');

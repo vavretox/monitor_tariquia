@@ -88,7 +88,7 @@ class UserManagementController extends Controller
         ]);
         $user->syncRoles([$data['role']]);
 
-        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado correctamente.');
+        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado correctamente. Para enviar las credenciales por correo, pulse Reenviar acceso.');
     }
 
     public function destroy(Request $request, User $user): RedirectResponse

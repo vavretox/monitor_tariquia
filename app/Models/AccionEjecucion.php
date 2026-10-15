@@ -66,9 +66,24 @@ class AccionEjecucion extends Model
         return $this->belongsToMany(Comunidad::class, 'accion_ejecucion_comunidad')->withTimestamps();
     }
 
+    public function observaciones(): HasMany
+    {
+        return $this->hasMany(AccionObservacion::class, 'accion_ejecucion_id');
+    }
+
     public function bitacoras(): HasMany
     {
         return $this->hasMany(AccionBitacora::class, 'accion_ejecucion_id')->latest('fecha_hora');
+    }
+
+    public function getAvanceSeguimientoAttribute(): int
+    {
+        $registro = $this->bitacoras
+            ->whereNotNull('avance')
+            ->sortBy([['fecha_hora', 'desc'], ['id', 'desc']])
+            ->first();
+
+        return (int) ($registro?->avance ?? $this->avance ?? 0);
     }
 
     public function getDiasRetrasoAttribute(): int

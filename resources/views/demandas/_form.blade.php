@@ -13,4 +13,4 @@
  <div><x-input-label value="Fuente"/><x-text-input name="fuente" class="w-full" :value="old('fuente',$d?->fuente)"/></div>
  @foreach(['descripcion'=>'Descripción','resultado_esperado'=>'Resultado esperado','proximo_paso'=>'Próximo paso','problema_bloqueo'=>'Problema o bloqueo'] as $campo=>$label)<div class="md:col-span-2"><x-input-label :value="$label"/><textarea name="{{ $campo }}" rows="3" class="w-full">{{ old($campo,$d?->{$campo}) }}</textarea></div>@endforeach
 </div>
-<div class="mt-6 flex gap-3"><x-primary-button>Guardar demanda</x-primary-button><a href="{{ $d?route('demandas.show',$d):route('demandas.index') }}" class="ui-btn-secondary">Cancelar</a></div>
+<div class="mt-6 flex gap-3"><x-primary-button icon="save">Guardar demanda</x-primary-button><a href="{{ $d?route('demandas.show',$d):route('demandas.index') }}" class="ui-btn-secondary ui-icon-close">Cancelar</a></div>

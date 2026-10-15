@@ -55,14 +55,14 @@ body{color:var(--ink);background:var(--canvas);font-feature-settings:"cv02","cv0
  .ui-card{@apply bg-white border border-slate-200/80;box-shadow:var(--shadow-sm);border-radius:var(--radius)}
  .ui-card-hover{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
  .ui-card-hover:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#bbd8ce}
- .ui-btn{@apply inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed;min-height:42px;border-radius:.65rem}
+ .ui-btn{@apply inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed;min-height:40px;border-radius:10px;line-height:1.25;border-width:1px;border-style:solid;border-color:transparent}
  .ui-btn:hover{transform:translateY(-1px)}
- .ui-btn:active{transform:translateY(0) scale(.98)}
- .ui-btn-primary{@apply ui-btn text-white;background:linear-gradient(135deg,var(--brand-700),var(--brand-600));box-shadow:0 5px 14px rgba(5,150,105,.2)}
- .ui-btn-primary:hover{background:linear-gradient(135deg,var(--brand-800),var(--brand-700));box-shadow:0 7px 18px rgba(5,150,105,.28)}
- .ui-btn-secondary{@apply ui-btn bg-white text-slate-700 border border-slate-300}
- .ui-btn-secondary:hover{@apply bg-slate-50 border-slate-400}
- .ui-btn-info{@apply ui-btn bg-blue-600 text-white}.ui-btn-info:hover{@apply bg-blue-700}
+ .ui-btn:active{transform:translateY(0)}
+ .ui-btn-primary{@apply ui-btn;background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+ .ui-btn-primary:hover{background:#d1fae5;border-color:#6ee7b7;box-shadow:0 3px 8px #0f172a0a}
+ .ui-btn-secondary{@apply ui-btn;background:#f8fafc;color:#334155;border-color:#dbe3ec}
+ .ui-btn-secondary:hover{background:#eef2f6;border-color:#a8b7c8}
+ .ui-btn-info{@apply ui-btn;background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.ui-btn-info:hover{background:#dbeafe;border-color:#93c5fd}
  .ui-btn-danger{@apply ui-btn bg-red-50 text-red-700 border border-red-200}.ui-btn-danger:hover{@apply bg-red-100 border-red-300}
  .ui-badge{@apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold}
  .ui-toolbar{@apply bg-white border border-slate-200/80 p-4 flex flex-wrap gap-3 items-center;box-shadow:var(--shadow-sm);border-radius:var(--radius)}
@@ -215,3 +215,42 @@ nav.app-navigation .brand-logo-link:hover{transform:translateY(-2px) rotate(-1de
 }
 .menu-user-trigger svg{transition:transform .28s ease!important}
 .menu-user-trigger:hover svg{transform:translateY(1px) rotate(180deg)}
+/* Shared action controls across menu modules. */
+.ui-table-shell{overflow-x:auto}
+.ui-actions{display:flex;align-items:center;justify-content:center;gap:7px;width:max-content;max-width:none;margin-inline:auto;white-space:nowrap}
+.ui-actions form{display:flex;align-items:center;margin:0}
+.ui-actions :is(.ui-btn,.ui-btn-primary,.ui-btn-secondary,.ui-btn-info,.ui-btn-danger,.ui-btn-log){min-height:38px;font-size:12px;gap:5px;padding:8px 10px!important;white-space:nowrap}
+.ui-actions-table:not([class*="min-w-"]){min-width:1100px}
+:is(.ui-btn,.ui-btn-primary,.ui-btn-secondary,.ui-btn-info,.ui-btn-danger,.ui-btn-log){transition:background-color .18s,border-color .18s,box-shadow .18s,transform .18s}
+:is(.ui-btn,.ui-btn-primary,.ui-btn-secondary,.ui-btn-info,.ui-btn-danger,.ui-btn-log):hover{box-shadow:0 3px 8px #0f172a0a}
+:is(.ui-btn,.ui-btn-primary,.ui-btn-secondary,.ui-btn-info,.ui-btn-danger,.ui-btn-log):focus-visible{outline:2px solid currentColor;outline-offset:3px}
+:is(.ui-btn,.ui-btn-primary,.ui-btn-secondary,.ui-btn-info,.ui-btn-danger,.ui-btn-log):disabled{cursor:not-allowed;opacity:.5;transform:none;box-shadow:none}
+[class*="ui-btn"][hidden]{display:none!important}
+[class*="ui-icon-"]::before{content:"";display:block;width:16px;height:16px;flex:none;background:currentColor;-webkit-mask:var(--button-icon) center/contain no-repeat;mask:var(--button-icon) center/contain no-repeat}
+.ui-btn-log{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;min-height:40px;font-weight:600;font-size:14px;border:1px solid;border-radius:10px}
+.ui-btn-log.ui-log-filled{background:#fff7f7;color:#b91c1c;border-color:#fecaca}
+.ui-btn-log.ui-log-filled:hover{background:#fee2e2;border-color:#fca5a5}
+.ui-btn-log.ui-log-empty{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.ui-btn-log.ui-log-empty:hover{background:#d1fae5;border-color:#6ee7b7}
+@media(prefers-reduced-motion:reduce){:is(.ui-btn,.ui-btn-primary,.ui-btn-secondary,.ui-btn-info,.ui-btn-danger,.ui-btn-log){transition:none!important;transform:none!important}}
+.ui-icon-eye{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M2%2012s3.5-7%2010-7%2010%207%2010%207-3.5%207-10%207S2%2012%202%2012Z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-edit{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m16%203%205%205-12%2012-6%201%201-6L16%203Z%22%2F%3E%3Cpath%20d%3D%22m13%206%205%205%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-delete{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%206h18M9%206V3h6v3M5%206l1%2015h12l1-15M10%2010v7M14%2010v7%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-plus{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%205v14M5%2012h14%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-search{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2210.5%22%20cy%3D%2210.5%22%20r%3D%226.5%22%2F%3E%3Cpath%20d%3D%22m16%2016%205%205%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-filter{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%204h18l-7%208v7l-4%202v-9L3%204Z%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-save{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%203h12l4%204v14H3V3h2Z%22%2F%3E%3Cpath%20d%3D%22M7%203v6h10V3M7%2021v-8h10v8%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-back{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m10%205-7%207%207%207M3%2012h18%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-close{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%206%2012%2012M6%2018%2018%206%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-chart{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2019V9M9%2019V5M14%2019v-7M19%2019V3%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-book{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M5%203h15v18H5a3%203%200%200%201%200-6h15M5%203a3%203%200%200%200-3%203v12M8%207h8M8%2011h6%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-download{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203v12m-5-5%205%205%205-5M4%2016v5h16v-5%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-print{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209V3h12v6M6%2017H3V9h18v8h-3M6%2014h12v7H6Z%22%2F%3E%3Cpath%20d%3D%22M17%2012h1%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-bell{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M18%208a6%206%200%200%200-12%200c0%207-3%207-3%209h18c0-2-3-2-3-9M10%2021h4%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-send{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m22%202-7%2020-4-9-9-4%2020-7ZM11%2013%2022%202%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-check{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m5%2012%204%204L19%206%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-refresh{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%207a8%208%200%200%200-14-2L3%208m0-5v5h5M4%2017a8%208%200%200%200%2014%202l3-3m0%205v-5h-5%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-shield{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%202%203%206v6c0%205%209%2010%209%2010s9-5%209-10V6l-9-4Z%22%2F%3E%3Cpath%20d%3D%22m8%2012%203%203%205-6%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-map{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%205%206-3%206%203%206-3v17l-6%203-6-3-6%203V5ZM9%202v17M15%205v17%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-login{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%203h7v18h-7M3%2012h12m-5-5%205%205-5%205%22%2F%3E%3C%2Fsvg%3E")}
+.ui-icon-calendar{--button-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%225%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M7%203v4M17%203v4M3%2011h18M7%2015h3M14%2015h3%22%2F%3E%3C%2Fsvg%3E")}

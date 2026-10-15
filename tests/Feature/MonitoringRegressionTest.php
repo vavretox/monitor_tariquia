@@ -46,10 +46,47 @@ class MonitoringRegressionTest extends TestCase
         $comunidad = Comunidad::create(['nombre' => 'Comunidad prueba', 'latitud' => -22, 'longitud' => -64]);
         $demanda = Demanda::create(['titulo' => 'Demanda pública', 'prioridad' => 'media', 'estado' => 'identificada']);
         $demanda->comunidades()->attach($comunidad);
-        AccionEjecucion::create(['demanda_id' => $demanda->id, 'titulo' => 'Acción pública', 'estado' => 'pendiente']);
+        $accion = AccionEjecucion::create(['demanda_id' => $demanda->id, 'titulo' => 'Acción pública', 'estado' => 'pendiente']);
+        $accion->comunidades()->attach($comunidad);
 
         $this->getJson(route('mapa.comunidades.show', $comunidad))
             ->assertOk()->assertJsonPath('url', null)->assertJsonPath('demandas.0.url', null)
             ->assertJsonCount(0, 'demandas.0.acciones.0.responsables');
     }
+
+    public function test_map_only_includes_demands_and_actions_assigned_to_each_community(): void
+    {
+        $primera = Comunidad::create(['nombre' => 'Primera', 'latitud' => -22, 'longitud' => -64]);
+        $segunda = Comunidad::create(['nombre' => 'Segunda', 'latitud' => -22.1, 'longitud' => -64.1]);
+        $compartida = Demanda::create(['titulo' => 'Demanda compartida', 'prioridad' => 'media', 'estado' => 'identificada']);
+        $compartida->comunidades()->attach([$primera->id, $segunda->id]);
+        $exclusiva = Demanda::create(['titulo' => 'Solo segunda', 'prioridad' => 'alta', 'estado' => 'identificada']);
+        $exclusiva->comunidades()->attach($segunda);
+        $local = AccionEjecucion::create(['demanda_id' => $compartida->id, 'titulo' => 'Acción primera', 'estado' => 'pendiente']);
+        $local->comunidades()->attach($primera);
+        $ajena = AccionEjecucion::create(['demanda_id' => $compartida->id, 'titulo' => 'Acción segunda vencida', 'estado' => 'pendiente', 'fecha_limite' => today()->subDay()]);
+        $ajena->comunidades()->attach($segunda);
+        $ambas = AccionEjecucion::create(['demanda_id' => $compartida->id, 'titulo' => 'Acción compartida', 'estado' => 'completada']);
+        $ambas->comunidades()->attach([$primera->id, $segunda->id]);
+
+        $this->getJson(route('mapa.comunidades.show', $primera))->assertOk()
+            ->assertJsonCount(1, 'demandas')->assertJsonPath('demandas.0.id', $compartida->id)
+            ->assertJsonCount(2, 'demandas.0.acciones')
+            ->assertJsonMissing(['titulo' => $ajena->titulo])
+            ->assertJsonFragment(['titulo' => $local->titulo])
+            ->assertJsonFragment(['titulo' => $ambas->titulo]);
+        $this->getJson(route('mapa.comunidades.show', $segunda))->assertOk()
+            ->assertJsonCount(2, 'demandas')->assertJsonMissing(['titulo' => $local->titulo])
+            ->assertJsonFragment(['titulo' => $ajena->titulo])
+            ->assertJsonFragment(['titulo' => $ambas->titulo]);
+        $this->get('/')->assertOk()->assertViewHas('mapaComunidades', function ($comunidades) use ($primera, $segunda) {
+            $local = $comunidades->firstWhere('id', $primera->id)['demandas'];
+            $otra = $comunidades->firstWhere('id', $segunda->id)['demandas'];
+
+            return $local->count() === 1 && $local->first()['acciones']->count() === 2
+                && !$local->first()['acciones']->contains('vencida', true)
+                && $otra->first()['acciones']->contains('vencida', true);
+        });
+    }
+
 }

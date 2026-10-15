@@ -31,7 +31,11 @@ class AccionBitacoraController extends Controller
                 'descripcion' => $registro->descripcion,
                 'avance' => $registro->avance,
                 'usuario' => $registro->usuario?->name ?? 'Usuario eliminado',
-                'fotos' => $registro->fotos->map(fn ($foto) => [
+                'documentos' => $registro->fotos->filter(fn ($archivo) => $archivo->tipo_mime === 'application/pdf')->map(fn ($archivo) => [
+                    'nombre' => $archivo->nombre_original,
+                    'url' => route('evidencias.bitacoras.foto', $archivo),
+                ])->values(),
+                'fotos' => $registro->fotos->reject(fn ($archivo) => $archivo->tipo_mime === 'application/pdf')->map(fn ($foto) => [
                     'nombre' => $foto->nombre_original,
                     'url' => route('evidencias.bitacoras.foto', $foto),
                 ])->values(),
@@ -45,20 +49,29 @@ class AccionBitacoraController extends Controller
             'fecha_hora' => ['required', 'date'],
             'descripcion' => ['required', 'string', 'max:5000'],
             'avance' => ['nullable', 'integer', 'between:0,100'],
+            'documentos' => ['nullable', 'array', 'max:10'],
+            'documentos.*' => ['bail', 'file', 'mimes:pdf', 'extensions:pdf', 'max:20480'],
             'fotografias' => ['nullable', 'array', 'max:10'],
             'fotografias.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
         ], [
+            'documentos.max' => 'Puedes adjuntar hasta 10 documentos por registro.',
+            'documentos.*.uploaded' => 'No se pudo subir el documento. Solo se aceptan archivos PDF de hasta 20 MB.',
+            'documentos.*.file' => 'Formato no aceptado. La documentación debe ser un archivo PDF.',
+            'documentos.*.mimes' => 'Formato no aceptado. Solo se permiten documentos PDF.',
+            'documentos.*.extensions' => 'Formato no aceptado. El documento debe tener la extensión .pdf.',
+            'documentos.*.max' => 'Cada documento PDF puede pesar como máximo 20 MB.',
+            'fotografias.*.uploaded' => 'No se pudo subir la fotografía. Elija una imagen de hasta 8 MB e inténtelo nuevamente.',
             'fotografias.max' => 'Puedes subir hasta 10 fotografías por registro.',
             'fotografias.*.image' => 'Cada evidencia debe ser una imagen válida.',
             'fotografias.*.mimes' => 'Las fotografías deben ser JPG, JPEG, PNG o WEBP.',
             'fotografias.*.max' => 'Cada fotografía puede pesar como máximo 8 MB.',
         ]);
 
-        $fotografias = $request->file('fotografias', []);
+        $adjuntos = array_merge($request->file('fotografias', []), $request->file('documentos', []));
         $storedPaths = [];
 
         try {
-            DB::transaction(function () use ($accione, $data, $fotografias, &$storedPaths) {
+            DB::transaction(function () use ($accione, $data, $adjuntos, &$storedPaths) {
                 $bitacora = $accione->bitacoras()->create([
                     'user_id' => auth()->id(),
                     'fecha_hora' => $data['fecha_hora'],
@@ -66,13 +79,15 @@ class AccionBitacoraController extends Controller
                     'avance' => $data['avance'] ?? null,
                 ]);
 
-                foreach ($fotografias as $fotografia) {
+                app(\App\Support\MonthlyReportControl::class)->registerLog($bitacora);
+
+                foreach ($adjuntos as $fotografia) {
                     $ruta = $fotografia->store("acciones/{$accione->id}/bitacoras/{$bitacora->id}", 'local');
                     $storedPaths[] = $ruta;
                     $bitacora->fotos()->create([
                         'ruta' => $ruta,
                         'nombre_original' => $fotografia->getClientOriginalName(),
-                        'tipo_mime' => $fotografia->getClientMimeType(),
+                        'tipo_mime' => $fotografia->getMimeType(),
                         'tamano' => $fotografia->getSize(),
                     ]);
                 }
@@ -89,11 +104,40 @@ class AccionBitacoraController extends Controller
         return redirect(route('acciones.show', $accione).'#bitacora')->with('success', 'Registro agregado a la bitácora.');
     }
 
+    public function update(Request $request, AccionEjecucion $accione, AccionBitacora $bitacora): RedirectResponse
+    {
+        abort_unless($bitacora->accion_ejecucion_id === $accione->id, 404);
+
+        $data = $request->validate([
+            'fecha_hora' => ['required', 'date'],
+            'descripcion' => ['required', 'string', 'max:5000'],
+            'avance' => ['nullable', 'integer', 'between:0,100'],
+        ]);
+        $data['avance'] = $data['avance'] ?? null;
+
+        DB::transaction(function () use ($accione, $bitacora, $data) {
+            $avanceChanged = $bitacora->avance !== ($data['avance'] === null ? null : (int) $data['avance']);
+            $bitacora->update($data);
+            if ($bitacora->wasChanged(['fecha_hora', 'descripcion', 'avance'])) {
+                app(\App\Support\MonthlyReportControl::class)->invalidateLog($bitacora);
+            }
+
+            if ($avanceChanged && $data['avance'] !== null) {
+                $accione->update(['avance' => $data['avance'], 'ultima_actualizacion_avance' => now()]);
+            }
+        });
+
+        return redirect(route('acciones.show', $accione).'#bitacora')->with('success', 'Registro actualizado en la bitácora.');
+    }
+
     public function destroy(AccionEjecucion $accione, AccionBitacora $bitacora): RedirectResponse
     {
         abort_unless($bitacora->accion_ejecucion_id === $accione->id, 404);
         $paths = $bitacora->fotos()->pluck('ruta')->all();
-        DB::transaction(fn () => $bitacora->delete());
+        DB::transaction(function () use ($bitacora) {
+            app(\App\Support\MonthlyReportControl::class)->invalidateLog($bitacora, true);
+            $bitacora->delete();
+        });
         Storage::disk('local')->delete($paths);
 
         return redirect(route('acciones.show', $accione).'#bitacora')->with('success', 'Registro eliminado de la bitácora.');

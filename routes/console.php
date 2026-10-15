@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
+Schedule::command('actions:control-monthly')->dailyAt('08:15')->timezone(config('monthly_reports.timezone'))->withoutOverlapping();
+
 Schedule::command('actions:notify-overdue')->dailyAt('08:00')->withoutOverlapping();
 Schedule::command('activitylog:clean')->weekly()->withoutOverlapping();
 Schedule::call(fn () => DB::table('overdue_action_notifications')->where('notified_on', '<', today()->subYear())->delete())->monthly();

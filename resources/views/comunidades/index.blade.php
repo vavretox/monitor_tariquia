@@ -6,13 +6,13 @@
 <div class="ui-toolbar">
  <form class="flex flex-wrap gap-3 items-center">
   <input name="buscar" value="{{ request('buscar') }}" placeholder="Buscar comunidad o territorio" class="border-gray-300 rounded-lg flex-1 min-w-0">
-  <button class="ui-btn-secondary !bg-slate-800 !text-white">Buscar</button>
-  <a href="{{ route('comunidades.create') }}" class="ui-btn-primary">+ Agregar</a>
+  <button class="ui-btn-secondary ui-icon-search">Buscar</button>
+  <a href="{{ route('comunidades.create') }}" class="ui-btn-primary ui-icon-plus">Agregar</a>
  </form>
 </div>
 
-<div class="ui-table-shell">
- <table class="w-full table-fixed text-sm">
+<div class="ui-table-shell community-table-wrap">
+ <table class="ui-actions-table w-full table-fixed text-sm">
   <colgroup>
    <col class="w-[25%]"><col class="w-[25%]"><col class="w-[25%]"><col class="w-[25%]">
   </colgroup>
@@ -33,10 +33,10 @@
      <span class="block break-all font-mono text-xs">{{ number_format($c->latitud,6) }},<br>{{ number_format($c->longitud,6) }}</span>
     </td>
     <td class="px-3 py-4">
-     <div class="flex flex-col xl:flex-row justify-center gap-2"><a href="{{ route('comunidades.show',$c) }}" class="ui-btn-secondary !px-3 !py-2">Ver</a>
-      <a href="{{ route('comunidades.edit',$c) }}" class="ui-btn-info !px-3 !py-2">Editar</a>
+     <div class="ui-actions"><a href="{{ route('comunidades.show',$c) }}" class="ui-btn-secondary !px-3 !py-2 ui-icon-eye">Ver</a>
+      <a href="{{ route('comunidades.edit',$c) }}" class="ui-btn-info !px-3 !py-2 ui-icon-edit">Editar</a>
       <form method="POST" action="{{ route('comunidades.destroy',$c) }}" onsubmit="return confirm('¿Eliminar esta comunidad?')" class="m-0">@csrf @method('DELETE')
-       <button class="ui-btn-danger w-full !px-3 !py-2">Eliminar</button>
+       <button class="ui-btn-danger w-full !px-3 !py-2 ui-icon-delete">Eliminar</button>
       </form>
      </div>
     </td>

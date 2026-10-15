@@ -1,1 +1,2 @@
-<button {{ $attributes->merge(['type'=>'submit','class'=>'ui-btn-danger focus:outline-none focus:ring-4 focus:ring-red-100']) }}>{{ $slot }}</button>
+@props(['icon' => 'delete'])
+<button {{ $attributes->merge(['type'=>'submit','class'=>'ui-btn-danger ui-icon-'.$icon]) }}>{{ $slot }}</button>

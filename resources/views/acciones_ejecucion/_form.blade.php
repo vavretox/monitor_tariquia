@@ -28,7 +28,7 @@
    <div class="flex items-center gap-2"><span id="responsables-contador" class="ui-badge bg-indigo-100 text-indigo-700">0</span><svg class="h-4 w-4 text-slate-500 transition-transform" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg></div>
   </summary>
   <div class="border-t border-slate-200 bg-slate-50 p-3">
-   <div class="mb-3 flex flex-wrap gap-2"><input id="buscar-responsable" type="search" placeholder="Buscar por nombre, cargo o institución..." class="min-w-56 flex-1 text-sm"><button id="limpiar-responsables" type="button" class="ui-btn-secondary !min-h-0 !px-3 !py-2">Limpiar selección</button></div>
+   <div class="mb-3 flex flex-wrap gap-2"><input id="buscar-responsable" type="search" placeholder="Buscar por nombre, cargo o institución..." class="min-w-56 flex-1 text-sm"><button id="limpiar-responsables" type="button" class="ui-btn-secondary !min-h-0 !px-3 !py-2 ui-icon-refresh">Limpiar selección</button></div>
    <div class="mb-2 flex justify-between text-xs text-slate-500"><span id="responsables-resultados"></span><span>Puedes marcar varios</span></div>
    <div id="lista-responsables" class="grid max-h-80 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
     @forelse($responsables as $r)
@@ -46,7 +46,7 @@
 <div><x-input-label value="Estado"/><select name="estado" class="w-full">@foreach(['pendiente'=>'Pendiente','en_ejecucion'=>'En ejecución','completada'=>'Completada','bloqueada'=>'Bloqueada'] as $v=>$l)<option value="{{ $v }}" @selected(old('estado',$x?->estado??'pendiente')===$v)>{{ $l }}</option>@endforeach</select></div>
 <div><x-input-label value="Fecha de inicio"/><x-text-input type="date" name="fecha_inicio" class="w-full" :value="old('fecha_inicio',$x?->fecha_inicio?->format('Y-m-d'))"/></div>
 <div><x-input-label value="Fecha límite"/><x-text-input type="date" name="fecha_limite" class="w-full" :value="old('fecha_limite',$x?->fecha_limite?->format('Y-m-d'))"/></div>
-@foreach(['descripcion'=>'Descripción','resultado_esperado'=>'Resultado esperado','proximo_paso'=>'Próximo paso','resultado'=>'Resultado obtenido'] as $campo=>$label)
+@foreach(['descripcion'=>'Descripción','resultado_esperado'=>'Resultado esperado','resultado'=>'Resultado obtenido'] as $campo=>$label)
 <div class="md:col-span-2">
  <x-input-label :value="$label"/>
  <textarea name="{{ $campo }}" rows="3" class="w-full">{{ old($campo,$x?->{$campo}) }}</textarea>
@@ -57,7 +57,7 @@
  <b>Seguimiento mediante bitácora</b>
  <p class="mt-1">Después de guardar la acción, registra los trabajos realizados, avances y fotografías desde la sección independiente Bitácora del módulo Acciones.</p>
 </div>
-</div><div class="mt-6 flex gap-3"><x-primary-button>Guardar acción</x-primary-button><a href="{{ $x ? route('demandas.show',$x->demanda_id) : route('acciones.index') }}" class="ui-btn-secondary">Cancelar</a></div>
+</div><div class="mt-6 flex gap-3"><x-primary-button icon="save">Guardar acción</x-primary-button><a href="{{ $x ? route('demandas.show',$x->demanda_id) : route('acciones.index') }}" class="ui-btn-secondary ui-icon-close">Cancelar</a></div>
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
  const demanda=document.getElementById('demanda_id'),communityOptions=[...document.querySelectorAll('.comunidad-opcion')],emptyCommunities=document.getElementById('comunidades-vacias');

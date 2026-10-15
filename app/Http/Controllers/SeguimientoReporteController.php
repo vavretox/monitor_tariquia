@@ -14,20 +14,36 @@ class SeguimientoReporteController extends Controller
     public function ejecutivo(Request $request)
     {
         $demandas = $this->demandasFiltradas($request)->get();
+        $filas = $demandas->flatMap(fn ($demanda) => $demanda->acciones->isEmpty()
+            ? [['demanda' => $demanda, 'accion' => null]]
+            : $demanda->acciones->map(fn ($accion) => ['demanda' => $demanda, 'accion' => $accion]))
+            ->sortBy([
+                fn ($a, $b) => (int) (($b['accion']?->bitacoras->count() ?? 0) > 0) <=> (int) (($a['accion']?->bitacoras->count() ?? 0) > 0),
+                fn ($a, $b) => (int) ($b['accion'] !== null) <=> (int) ($a['accion'] !== null),
+                fn ($a, $b) => ($b['accion']?->avance_seguimiento ?? 0) <=> ($a['accion']?->avance_seguimiento ?? 0),
+            ])->values();
         $tipos = TipoNecesidad::orderBy('nombre')->get();
         $comunidades = Comunidad::orderBy('nombre')->get();
 
-        return view('reportes.demandas', compact('demandas', 'tipos', 'comunidades'));
+        return view('reportes.demandas', compact('demandas', 'filas', 'tipos', 'comunidades'));
     }
 
     public function alertas()
     {
-        $base = ['demanda.comunidades', 'responsables'];
+        $base = ['demanda.comunidades', 'responsables', 'bitacoras'];
         $vencidas = AccionEjecucion::with($base)->where('estado', '!=', 'completada')->whereDate('fecha_limite', '<', today())->orderBy('fecha_limite')->get();
         $proximas = AccionEjecucion::with($base)->where('estado', '!=', 'completada')->whereBetween('fecha_limite', [today(), today()->addDays(15)])->orderBy('fecha_limite')->get();
         $sinActualizar = AccionEjecucion::with($base)->where('estado', '!=', 'completada')->where(fn ($q) => $q->whereNull('ultima_actualizacion_avance')->orWhere('ultima_actualizacion_avance', '<', now()->subDays(30)))->get();
         $sinAcciones = Demanda::with(['comunidades', 'tipo'])->doesntHave('acciones')->get();
         $completadasSinEvidencia = AccionEjecucion::with('demanda.comunidades')->where('estado', 'completada')->whereDoesntHave('bitacoras.fotos')->get();
+
+        foreach (['vencidas', 'proximas', 'sinActualizar', 'completadasSinEvidencia'] as $grupo) {
+            ${$grupo}->loadMissing('bitacoras');
+            ${$grupo} = ${$grupo}->sortBy([
+                fn ($a, $b) => (int) $b->bitacoras->isNotEmpty() <=> (int) $a->bitacoras->isNotEmpty(),
+                fn ($a, $b) => $b->avance_seguimiento <=> $a->avance_seguimiento,
+            ])->values();
+        }
 
         return view('reportes.alertas_demandas', compact('vencidas', 'proximas', 'sinActualizar', 'sinAcciones', 'completadasSinEvidencia'));
     }
@@ -41,14 +57,17 @@ class SeguimientoReporteController extends Controller
                 ->where('titulo', 'like', '%'.$request->buscar.'%')
                 ->orWhereHas('responsables', fn ($responsables) => $responsables->where('nombre_completo', 'like', '%'.$request->buscar.'%'))
                 ->orWhereHas('demanda', fn ($demanda) => $demanda->where('titulo', 'like', '%'.$request->buscar.'%'))))
-            ->get();
+            ->get()->sortBy([
+                fn ($a, $b) => (int) $b->bitacoras->isNotEmpty() <=> (int) $a->bitacoras->isNotEmpty(),
+                fn ($a, $b) => $b->avance_seguimiento <=> $a->avance_seguimiento,
+            ])->values();
 
         return response()->streamDownload(function () use ($acciones) {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($file, ['Comunidades', 'Tipo o sector', 'Demanda', 'Acción', 'Responsables', 'Estado', 'Fecha límite', 'Próximo paso', 'Evidencias'], ';');
+            fputcsv($file, ['Comunidades', 'Tipo o sector', 'Demanda', 'Acción', 'Responsables', 'Estado', 'Avance (%)', 'Fecha límite', 'Próximo paso', 'Evidencias'], ';');
             foreach ($acciones as $accion) {
-                fputcsv($file, [$accion->demanda?->comunidades?->pluck('nombre')->join(', '), $accion->demanda?->tipo?->nombre ?? 'Sin clasificar', $accion->demanda?->titulo, $accion->titulo, $accion->responsables->pluck('nombre_completo')->join(', '), $accion->estado, $accion->fecha_limite?->format('d/m/Y'), $accion->proximo_paso, $accion->bitacoras->sum(fn ($bitacora) => $bitacora->fotos->count())], ';');
+                fputcsv($file, [$accion->demanda?->comunidades?->pluck('nombre')->join(', '), $accion->demanda?->tipo?->nombre ?? 'Sin clasificar', $accion->demanda?->titulo, $accion->titulo, $accion->responsables->pluck('nombre_completo')->join(', '), $accion->estado, $accion->avance_seguimiento, $accion->fecha_limite?->format('d/m/Y'), $accion->proximo_paso, $accion->bitacoras->sum(fn ($bitacora) => $bitacora->fotos->count())], ';');
             }
             fclose($file);
         }, 'matriz-demandas-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);

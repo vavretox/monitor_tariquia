@@ -1,3 +1,9 @@
+# Allow ten 20 MB PDFs and ten 8 MB photos plus form data.
+<IfModule php_module>
+    php_value upload_max_filesize 20M
+    php_value post_max_size 300M
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

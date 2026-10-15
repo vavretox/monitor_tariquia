@@ -7,4 +7,4 @@
  <div class="flex items-center pt-6"><input type="hidden" name="is_active" value="0"><label class="inline-flex items-center gap-3"><input type="checkbox" name="is_active" value="1" @checked(old('is_active',$user->exists?$user->is_active:true))><span><strong class="block text-sm">Usuario activo</strong><small class="text-slate-500">Puede iniciar sesión en el sistema.</small></span></label></div>
 </div>
 @unless($user->exists)<div class="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">Se generará una contraseña segura y temporal. Las credenciales se enviarán al correo indicado y el usuario deberá cambiar la clave al ingresar.</div>@endunless
-<div class="mt-6 flex flex-wrap gap-3"><button class="ui-btn-primary">{{ $user->exists?'Guardar cambios':'Crear y enviar credenciales' }}</button><a href="{{ route('admin.users.index') }}" class="ui-btn-secondary">Cancelar</a></div>
+<div class="mt-6 flex flex-wrap gap-3"><button class="ui-btn-primary ui-icon-save">{{ $user->exists?'Guardar cambios':'Crear y enviar credenciales' }}</button><a href="{{ route('admin.users.index') }}" class="ui-btn-secondary ui-icon-close">Cancelar</a></div>

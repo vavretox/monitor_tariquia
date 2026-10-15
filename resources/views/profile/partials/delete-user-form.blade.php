@@ -9,7 +9,7 @@
         </p>
     </header>
 
-    <x-danger-button
+    <x-danger-button icon="delete"
         x-data=""
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
     >{{ __('Delete Account') }}</x-danger-button>
@@ -46,7 +46,7 @@
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-danger-button class="ms-3">
+                <x-danger-button icon="delete" class="ms-3">
                     {{ __('Delete Account') }}
                 </x-danger-button>
             </div>

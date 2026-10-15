@@ -6,6 +6,6 @@
  <div class="overflow-x-auto rounded-xl border border-slate-200"><table class="w-full min-w-[600px] text-sm"><thead><tr><th class="p-3 text-left">Módulo</th><th class="p-3 text-left">Acciones permitidas</th></tr></thead><tbody>
  @foreach($modules as $moduleKey=>$module)<tr class="border-t"><td class="p-4 font-semibold">{{ $module['label'] }}</td><td class="p-4"><div class="flex flex-wrap gap-4">@foreach($module['actions'] as $action=>$label)@php($permission=$moduleKey.'.'.$action)<label class="inline-flex items-center gap-2"><input type="checkbox" name="permissions[]" value="{{ $permission }}" @checked(in_array($permission,old('permissions',$selected)))><span>{{ $label }}</span></label>@endforeach</div></td></tr>@endforeach
  </tbody></table></div><x-input-error :messages="$errors->get('permissions')" class="mt-2"/>
- <div class="mt-6 flex gap-3"><button class="ui-btn-primary">Guardar permisos</button><a href="{{ route('admin.roles.index') }}" class="ui-btn-secondary">Cancelar</a></div>
+ <div class="mt-6 flex gap-3"><button class="ui-btn-primary ui-icon-shield">Guardar permisos</button><a href="{{ route('admin.roles.index') }}" class="ui-btn-secondary ui-icon-close">Cancelar</a></div>
  </form></div></div>
 </x-app-layout>

@@ -25,7 +25,7 @@ class UserCredentialsNotification extends Notification
             ->line('Se creó una cuenta institucional para ti.')
             ->line('Usuario: '.$notifiable->email)
             ->line('Contraseña temporal: '.$this->temporaryPassword)
-            ->action('Ingresar al sistema', route('login'))
+            ->action('Ingresar al sistema', rtrim(config('app.url'), '/').'/')
             ->line('Por seguridad, cambia esta contraseña al ingresar por primera vez.')
             ->line('Si no esperabas este acceso, informa al administrador.')
             ->salutation("Ing. Horacio Daniel Poveda Martínez  \nAdministrador de Infraestructura y Telecomunicaciones  \nhoracio.poveda@tarija.gob.bo - 69317339");

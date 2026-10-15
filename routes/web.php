@@ -29,6 +29,9 @@ Route::middleware(['auth', 'active', 'verified', 'password.changed'])->group(fun
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('permission:dashboard.view')->name('dashboard');
     Route::get('/reportes/seguimiento', [SeguimientoReporteController::class, 'ejecutivo'])->middleware('permission:dashboard.view')->name('reportes.seguimiento');
     Route::get('/reportes/seguimiento.csv', [SeguimientoReporteController::class, 'csv'])->middleware('permission:dashboard.view')->name('reportes.seguimiento.csv');
+    Route::get('/reportes/control-mensual', [\App\Http\Controllers\InformeMensualController::class, 'index'])->middleware('permission:acciones.view')->name('reportes.control-mensual');
+    Route::post('/informes-mensuales/{informe}/presentar', [\App\Http\Controllers\InformeMensualController::class, 'submit'])->middleware('permission:acciones.edit')->name('informes-mensuales.presentar');
+    Route::post('/informes-mensuales/{informe}/revisar', [\App\Http\Controllers\InformeMensualController::class, 'review'])->middleware(['role:admin|tecnico', 'permission:acciones.edit'])->name('informes-mensuales.revisar');
     Route::get('/reportes/alertas', [SeguimientoReporteController::class, 'alertas'])->middleware('permission:dashboard.view')->name('reportes.alertas');
 
     Route::resource('comunidades', ComunidadController::class)->only(['index', 'show'])->parameters(['comunidades' => 'comunidad'])->middleware('permission:comunidades.view');
@@ -45,6 +48,8 @@ Route::middleware(['auth', 'active', 'verified', 'password.changed'])->group(fun
     Route::resource('responsables', ResponsableController::class)->only(['create', 'store'])->middleware('permission:responsables.create');
     Route::resource('responsables', ResponsableController::class)->only(['edit', 'update'])->middleware('permission:responsables.edit');
     Route::resource('responsables', ResponsableController::class)->only(['destroy'])->middleware('permission:responsables.delete');
+    Route::get('acciones/{accione}/seguimiento', [\App\Http\Controllers\AccionSeguimientoController::class, 'show'])->middleware('permission:acciones.view')->name('acciones.seguimiento');
+    Route::post('acciones/{accione}/observaciones', [\App\Http\Controllers\AccionSeguimientoController::class, 'store'])->middleware('permission:acciones.edit')->name('acciones.observaciones.store');
     Route::resource('acciones', AccionEjecucionController::class)->only(['index', 'show'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.view');
     Route::resource('acciones', AccionEjecucionController::class)->only(['create', 'store'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.create');
     Route::resource('acciones', AccionEjecucionController::class)->only(['edit', 'update'])->parameters(['acciones' => 'accione'])->middleware('permission:acciones.edit');
@@ -53,6 +58,8 @@ Route::middleware(['auth', 'active', 'verified', 'password.changed'])->group(fun
         ->middleware('permission:acciones.view')->name('acciones.bitacoras.index');
     Route::post('acciones/{accione}/bitacoras', [AccionBitacoraController::class, 'store'])
         ->middleware('permission:acciones.edit')->name('acciones.bitacoras.store');
+    Route::put('acciones/{accione}/bitacoras/{bitacora}', [AccionBitacoraController::class, 'update'])
+        ->middleware('permission:acciones.edit')->name('acciones.bitacoras.update');
     Route::delete('acciones/{accione}/bitacoras/{bitacora}', [AccionBitacoraController::class, 'destroy'])
         ->middleware('permission:acciones.edit')->name('acciones.bitacoras.destroy');
     Route::get('evidencias/bitacoras/{foto}', [AccionBitacoraController::class, 'foto'])
@@ -76,6 +83,7 @@ Route::middleware(['auth', 'active', 'verified', 'password.changed'])->group(fun
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/notificaciones/{notification}/leer', [ProfileController::class, 'readNotification'])->name('profile.notifications.read');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
